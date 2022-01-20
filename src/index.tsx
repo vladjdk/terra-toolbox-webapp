@@ -1,17 +1,36 @@
+import { getChainOptions, WalletProvider } from '@terra-money/wallet-provider';
+import { ConnectSample } from 'components/ConnectSample';
+import { CW20TokensSample } from 'components/CW20TokensSample';
+import { NetworkSample } from 'components/NetworkSample';
+import { QuerySample } from 'components/QuerySample';
+import { SignBytesSample } from 'components/SignBytesSample';
+import { SignSample } from 'components/SignSample';
+import { TxSample } from 'components/TxSample';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './style.css';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+function App() {
+  return (
+    <main
+      style={{ margin: 20, display: 'flex', flexDirection: 'column', gap: 40 }}
+    >
+      <ConnectSample />
+      <QuerySample />
+      <TxSample />
+      <SignSample />
+      <SignBytesSample />
+      <CW20TokensSample />
+      <NetworkSample />
+    </main>
+  );
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+getChainOptions().then((chainOptions) => {
+  ReactDOM.render(
+    <WalletProvider {...chainOptions}>
+      <App />
+    </WalletProvider>,
+    document.getElementById('root'),
+  );
+});
