@@ -2,7 +2,7 @@ import { Int, Fee, MsgExecuteContract } from '@terra-money/terra.js';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import BigNumber from "bignumber.js";
-import { string } from 'yargs';
+import "../style.css"
 import {
     CreateTxFailed,
     Timeout,
@@ -216,21 +216,19 @@ export function QuerySample() {
         }, [connectedWallet, lcd]);
         
         return (
-            <div>
+            <div className='withdrawals'>
             <h1>Liquidation Withdrawals</h1>
             <h2>bLUNA: {luna_status}</h2>
             {/* {luna_bidder && <pre>Bidder: {luna_bidder}</pre>} */}
-            {total_luna_bids && <pre>Total bid amount: {total_luna_bids} UST</pre>}
-            {pending_luna_collection && <pre>Pending collection amount: {pending_luna_collection} bLUNA</pre>}
-            {luna_error && <pre>Error: {luna_error}</pre>}
+            <p>{total_luna_bids && <pre>Total bid amount: {total_luna_bids} UST</pre>}</p>
+            <p>{pending_luna_collection && <pre>Pending collection amount: {pending_luna_collection} bLUNA</pre>}</p>
+            <p>{luna_error && <pre>Error: {luna_error}</pre>}</p>
             {luna_bids && <pre>bLUNA Bids: {luna_bids.map(item => {
                 return <p>{item}</p>
             })}</pre>}
             {!luna_tx_result && !luna_tx_error && pending_luna_collection && total_luna_bids?.length != 0 && luna_status && parseFloat(pending_luna_collection!.toString()) !=0 ? <button onClick={withdrawLuna}>Withdraw {pending_luna_collection} bLUNA</button> : <button disabled onClick={withdrawLuna}>Withdraw 0 bLUNA</button>}
             {luna_tx_result && (
             <>
-            <pre>{JSON.stringify(luna_tx_result, null, 2)}</pre>
-
                 {connectedWallet && luna_tx_result && (
                     <div>
                     <a
