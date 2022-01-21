@@ -1,14 +1,16 @@
 import { getChainOptions, WalletProvider } from '@terra-money/wallet-provider';
 import { Main } from "Main"
-import React from 'react';
+import { BrowserRouter } from "react-router-dom";
 import ReactDOM from 'react-dom';
 import './style.css'
 
 getChainOptions().then((chainOptions) => {
   ReactDOM.render(
-    <WalletProvider {...chainOptions}>
-      <Main />
-    </WalletProvider>,
+    <BrowserRouter>
+      <WalletProvider {...chainOptions}>
+        <Main />
+      </WalletProvider>
+    </BrowserRouter>,
     document.getElementById('root'),
   );
 });
