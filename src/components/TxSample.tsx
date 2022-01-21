@@ -1,4 +1,5 @@
 import { Fee, MsgSend } from '@terra-money/terra.js';
+import { MsgExecuteContract } from '@terra-money/terra.proto/terra/wasm/v1beta1/tx';
 import {
   CreateTxFailed,
   Timeout,
