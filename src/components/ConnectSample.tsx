@@ -17,8 +17,8 @@ export function ConnectSample() {
 
   return (
     <div>
-      <h1>Connect Sample</h1>
-      <section>
+      <h1>Connect Wallet</h1>
+      {/* <section>
         <pre>
           {JSON.stringify(
             {
@@ -33,7 +33,7 @@ export function ConnectSample() {
             2,
           )}
         </pre>
-      </section>
+      </section> */}
 
       <footer>
         {status === WalletStatus.WALLET_NOT_CONNECTED && (

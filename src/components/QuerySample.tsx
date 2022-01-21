@@ -1,6 +1,6 @@
 import { Int, Fee, MsgExecuteContract } from '@terra-money/terra.js';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import BigNumber from "bignumber.js";
 import { string } from 'yargs';
 import {
@@ -11,6 +11,7 @@ import {
     TxUnspecifiedError,
     UserDenied,
   } from '@terra-money/wallet-provider';
+import { GasInfo } from '@terra-money/terra.proto/cosmos/base/abci/v1beta1/abci';
 
 export function QuerySample() {
     const lcd = useLCDClient();
@@ -74,6 +75,7 @@ export function QuerySample() {
                     bids_idx: luna_bid_idx
                 }}),
               ],
+              memo: "TerraToolbox.com"
             })
             .then((nextTxResult: TxResult) => {
               console.log(nextTxResult);
@@ -120,6 +122,7 @@ export function QuerySample() {
                     bids_idx: luna_bid_idx
                 }}),
               ],
+              memo: "TerraToolbox.com"
             })
             .then((nextTxResult: TxResult) => {
               console.log(nextTxResult);
@@ -155,7 +158,7 @@ export function QuerySample() {
                         collateral_token: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
                         bidder: connectedWallet.walletAddress
                     }
-                }).then((res) => {
+                }, ).then((res) => {
                     if(res.bids.length > 0) {
                         setLunaStatus("Available")
                         
@@ -214,7 +217,7 @@ export function QuerySample() {
         
         return (
             <div>
-            <h1>Query Sample</h1>
+            <h1>Liquidation Withdrawals</h1>
             <h2>bLUNA: {luna_status}</h2>
             {/* {luna_bidder && <pre>Bidder: {luna_bidder}</pre>} */}
             {total_luna_bids && <pre>Total bid amount: {total_luna_bids} UST</pre>}
