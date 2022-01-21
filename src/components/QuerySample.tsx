@@ -75,7 +75,7 @@ export function QuerySample() {
                     bids_idx: luna_bid_idx
                 }}),
               ],
-              memo: "TerraToolbox.com"
+            //   memo: "TerraToolbox.com"
             })
             .then((nextTxResult: TxResult) => {
               console.log(nextTxResult);
@@ -122,7 +122,7 @@ export function QuerySample() {
                     bids_idx: luna_bid_idx
                 }}),
               ],
-              memo: "TerraToolbox.com"
+            //   memo: "TerraToolbox.com"
             })
             .then((nextTxResult: TxResult) => {
               console.log(nextTxResult);
