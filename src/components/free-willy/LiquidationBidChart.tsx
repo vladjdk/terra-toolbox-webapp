@@ -13,6 +13,49 @@ export const options = {
     },
 };
 
+const defaultData = {
+    labels: [
+        "0%",
+        "1%",
+        "2%",
+        "3%",
+        "4%",
+        "5%",
+        "6%",
+        "7%",
+        "8%",
+        "9%",
+        "10%",
+        "11%",
+        "12%",
+        "13%",
+        "14%",
+        "15%",
+        "16%",
+        "17%",
+        "18%",
+        "19%",
+        "20%",
+        "21%",
+        "22%",
+        "23%",
+        "24%",
+        "25%",
+        "26%",
+        "27%",
+        "28%",
+        "29%",
+        "30%"
+    ], 
+    datasets: [ 
+        {
+            label:"",
+            data:new Array(31).fill(0)
+        }
+    ]
+}
+
+
 export default function LiquidationBidChart() {
     const network = useNetwork();
     const {getBidPoolsByCollateral} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
@@ -66,7 +109,17 @@ export default function LiquidationBidChart() {
             )
         } else {
             // TODO: Add loading animation.
-            return (<></>)
+            return (
+                <Stack sx={{padding: '10px'}}>
+                    <Typography variant="h4" sx={{margin: '10px'}}>
+                        Liquidation Bids
+                    </Typography>
+                    <Bar
+                        options={options}
+                        data={defaultData}
+                    />
+                </Stack>
+            )
         }
     }
 
