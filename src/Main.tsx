@@ -1,8 +1,7 @@
 import { RecoilRoot } from "recoil";
 import { useInitAddress, useInitNetwork } from "data/init";
-import { AppBar, createTheme, FormControl, IconButton, InputLabel, MenuItem, Select, Toolbar, Typography, ThemeProvider } from '@mui/material';
+import { AppBar, createTheme, Toolbar, Typography, ThemeProvider } from '@mui/material';
 import CssBaseline from "@mui/material/CssBaseline";
-import Button from '@mui/material/Button';
 import { Home } from 'components/Home';
 import { LiquidationWithdrawals } from 'components/free-willy/LiquidationWithdrawals';
 import { Navigate, Route, Routes } from 'react-router-dom';
