@@ -29,9 +29,8 @@ export function Wallet() {
   return (
     <div>
         <Chip label={getButtonText()} sx={{bgcolor: 'primary.light'}} onClick={handleClickOpen} />
-        <Dialog
+        {open && <Dialog
             open={open}
-            keepMounted
             onClose={handleClose}
             aria-describedby="alert-dialog-slide-description"
         >
@@ -46,14 +45,21 @@ export function Wallet() {
                             {connectedWallet.terraAddress}
                         </DialogContentText>
                         <Stack spacing={2} direction="row" sx={{justifyContent: 'center'}}>
-                            <Button variant="contained" onClick={() => disconnect()}>Disconnect</Button>
+                            <Button variant="contained" onClick={() => {
+                                handleClose();
+                                disconnect();
+                                }
+                            }>Disconnect</Button>
                         </Stack>
                     </>
                     :
                     <Stack spacing={2} direction="row" sx={{justifyContent: 'center'}}>
                         {availableConnections.map(
                             ({ type, name, icon, identifier = '' }) => (
-                                <Button variant="contained" key={'connection-' + type + identifier} onClick={() => connect(type, identifier)}>
+                                <Button variant="contained" key={'connection-' + type + identifier} onClick={() => {
+                                    handleClose();
+                                    connect(type, identifier);
+                                    }}>
                                     <img
                                         src={icon}
                                         alt={name}
@@ -69,7 +75,7 @@ export function Wallet() {
             <DialogActions>
                 <Button onClick={handleClose}>Close</Button>
             </DialogActions>
-        </Dialog>
+        </Dialog>}
     </div>
   );
 }

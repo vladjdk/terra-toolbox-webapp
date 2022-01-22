@@ -13,6 +13,11 @@ const networks: Record<string, ToolboxNetworkInfo> = {
       ethereum: "terra13yxhrk08qvdf5zdc9ss5mwsg5sf7zva9xrgwgc",
       bsc: "terra1g6llg3zed35nd3mh9zx6n64tfw3z67w2c48tn2",
     },
+    contracts: {
+      beth: "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
+      bluna: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
+      anchorLiquidation: "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u"
+    },
     fee: { gasPrice: 0.15, amount: 100000 },
   },
   testnet: {
@@ -24,6 +29,11 @@ const networks: Record<string, ToolboxNetworkInfo> = {
     shuttle: {
       ethereum: "terra10a29fyas9768pw8mewdrar3kzr07jz8f3n73t3",
       bsc: "terra1paav7jul3dzwzv78j0k59glmevttnkfgmgzv2r",
+    },
+    contracts: {
+      beth: "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
+      bluna: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
+      anchorLiquidation: "terra18j0wd0f62afcugw2rx5y8e6j5qjxd7d6qsc87r"
     },
     fee: { gasPrice: 0.15, amount: 100000 },
   },
@@ -37,6 +47,7 @@ const networks: Record<string, ToolboxNetworkInfo> = {
       ethereum: "",
       bsc: "",
     },
+    contracts: {},
     fee: { gasPrice: 0.15, amount: 100000 },
   },
 };
