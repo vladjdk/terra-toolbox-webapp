@@ -7,6 +7,24 @@ import { LiquidationWithdrawals } from 'components/free-willy/LiquidationWithdra
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const RecoilInit = () => {
   useInitAddress();

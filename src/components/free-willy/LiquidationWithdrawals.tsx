@@ -1,10 +1,12 @@
 import { QuerySample } from 'components/free-willy/QuerySample';
-import 'components/free-willy/liquidation-withdrawals.css'
+import LiquidationBidChart from 'components/free-willy/LiquidationBidChart';
+import 'components/free-willy/liquidation-withdrawals.css';
 
 export function LiquidationWithdrawals() {
     return (
-      <div id="liquidation-withdrawals">
-        <QuerySample />
-      </div>
+        <div id="liquidation-withdrawals">
+            <LiquidationBidChart/>
+            <QuerySample />
+        </div>
     );
   }

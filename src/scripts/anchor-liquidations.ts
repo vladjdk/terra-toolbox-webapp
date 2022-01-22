@@ -111,3 +111,26 @@ export async function getBidsByUser(
         return [];
     }
 }
+
+interface BidPool {
+    sum_snapshot: string,
+    product_snapshot: string,
+    total_bid_amount: string,
+    premium_rate: string,
+    current_epoch: string,
+    current_scale: string
+}
+
+
+interface BidPoolsByCollateralResponse {
+    bid_pools: BidPool[]
+}
+
+export async function getBidPoolsByCollateral(lcdClient: LCDClient, collateralTokenContract: string): Promise<BidPoolsByCollateralResponse> {
+    return await lcdClient.wasm.contractQuery(ANCHOR_LIQUIDATION_CONTRACT, {
+        bid_pools_by_collateral: {
+            collateral_token: collateralTokenContract,
+            limit: 31
+        }
+    }) as BidPoolsByCollateralResponse;
+}
