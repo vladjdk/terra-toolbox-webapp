@@ -7,6 +7,7 @@ import { LiquidationWithdrawals } from 'components/free-willy/LiquidationWithdra
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
+import { KujiWithdrawals } from "components/free-willy/KujiWithdrawals";
 
 const RecoilInit = () => {
   useInitAddress();
@@ -58,6 +59,7 @@ export function Main() {
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="freewilly" element={<LiquidationWithdrawals />} />
+          <Route path="kujiwithdraw" element={<KujiWithdrawals />} />
           <Route path="*" element={<Navigate replace to="/"/>}/>
         </Routes>
       </ThemeProvider>

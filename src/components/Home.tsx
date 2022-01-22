@@ -15,9 +15,9 @@ const tools = [
         description: 'Withdraw Anchor liquidations with no additional fee!'
     },
     {
-        name: 'Coming Soon!',
-        link: '/',
-        description: 'More tools will be added in the future!  Stay tuned!'
+        name: '$Kuji Gov Access',
+        link: '/kujiwithdraw',
+        description: 'Withdraw your staked $Kuji & LP if your locked out of Kujira governance.'
     }
 ] as Tool[]
 
