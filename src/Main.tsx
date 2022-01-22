@@ -3,28 +3,10 @@ import { useInitAddress, useInitNetwork } from "data/init";
 import { AppBar, createTheme, Toolbar, Typography, ThemeProvider } from '@mui/material';
 import CssBaseline from "@mui/material/CssBaseline";
 import { Home } from 'components/Home';
-import { LiquidationWithdrawals } from 'components/free-willy/LiquidationWithdrawals';
+import { FreeWilly } from 'components/free-willy/FreeWilly';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-} from 'chart.js';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
 
 const RecoilInit = () => {
   useInitAddress();
@@ -75,7 +57,7 @@ export function Main() {
         </AppBar>
         <Routes>
           <Route path="/" element={<Home/>} />
-          <Route path="freewilly" element={<LiquidationWithdrawals />} />
+          <Route path="freewilly" element={<FreeWilly/>} />
           <Route path="*" element={<Navigate replace to="/"/>}/>
         </Routes>
       </ThemeProvider>

@@ -1,7 +1,8 @@
-import { useLCDClient } from "@terra-money/wallet-provider";
+import { Typography, Stack } from "@mui/material";
+import { useAnchorLiquidationContract } from "hooks/useAnchorLiquidationContract";
+import useNetwork from "hooks/useNetwork";
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import { BETH_TOKEN_CONTRACT, BLUNA_TOKEN_CONTRACT, getBidPoolsByCollateral } from "scripts/anchor-liquidations";
 
 export const options = {
     responsive: true,
@@ -13,11 +14,12 @@ export const options = {
 };
 
 export default function LiquidationBidChart() {
-    const lcdClient = useLCDClient();
+    const network = useNetwork();
+    const {getBidPoolsByCollateral} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     const [data, setData] = useState<any>();
 
     const formatRate = (rate: string) => {
-        return `%${(Math.floor(parseFloat(rate) * 100)).toString()}`;
+        return `${(Math.round(parseFloat(rate) * 100)).toString()}%`;
     }
 
     const formatBidAmount = (bidAmount: string) => {
@@ -25,8 +27,8 @@ export default function LiquidationBidChart() {
     }
 
     useEffect(() => {
-        const bethPoolsPromise = getBidPoolsByCollateral(lcdClient, BETH_TOKEN_CONTRACT);
-        const blunaPoolsPromise = getBidPoolsByCollateral(lcdClient, BLUNA_TOKEN_CONTRACT);
+        const bethPoolsPromise = getBidPoolsByCollateral(network.contracts.beth);
+        const blunaPoolsPromise = getBidPoolsByCollateral(network.contracts.bluna);
         Promise.all([bethPoolsPromise, blunaPoolsPromise]).then(data => {
             const [bethPools, blunaPools] = data;
             const labels = bethPools.bid_pools.map(pool => formatRate(pool.premium_rate));
@@ -48,14 +50,26 @@ export default function LiquidationBidChart() {
         })
     }, []);
 
+    const renderGraph = () => {
+        if (data) {
+            return (
+                <Stack sx={{padding: '10px'}}>
+                    <Typography variant="h4" sx={{margin: '10px'}}>
+                        Liquidation Bids
+                    </Typography>
+                    <Bar
+                        options={options}
+                        data={data}
+                    />
+                </Stack>
+            )
+        } else {
+            // TODO: Add loading animation.
+            return (<></>)
+        }
+    }
+
     return (
-        <>
-            {data &&
-                <Bar
-                    options={options}
-                    data={data}
-                />
-            }
-        </>
+        <>{renderGraph()}</>
     )
 }

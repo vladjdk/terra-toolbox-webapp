@@ -16,6 +16,7 @@ interface LocalNetworkConfig {
   stats: string;
   /** Contracts */
   shuttle: Record<ShuttleNetwork, string>;
+  contracts: Record<ContractName, string>;
   /** Fixed fee */
   fee: { gasPrice: number; amount: number };
 }
