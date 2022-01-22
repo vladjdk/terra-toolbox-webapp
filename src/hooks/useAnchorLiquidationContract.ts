@@ -41,7 +41,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
     const { post } = useWallet();
     // TODO: Calculate fee via simulation if possible.
     const fee = useFee();
-    const userWalletAddr = 'terra1qu8ulzqkwmycng0c8n54shcvcd3q24qkjludyv'; //useRecoilValue(addressState);
+    const userWalletAddr = useRecoilValue(addressState);
     const lcdClient = useRecoilValue(lcdClientQuery);
 
     function _query<T>(queryMsg: any) {

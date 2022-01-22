@@ -31,9 +31,9 @@ const networks: Record<string, ToolboxNetworkInfo> = {
       bsc: "terra1paav7jul3dzwzv78j0k59glmevttnkfgmgzv2r",
     },
     contracts: {
-      beth: "",
-      bluna: "",
-      anchorLiquidation: ""
+      beth: "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
+      bluna: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
+      anchorLiquidation: "terra18j0wd0f62afcugw2rx5y8e6j5qjxd7d6qsc87r"
     },
     fee: { gasPrice: 0.15, amount: 100000 },
   },

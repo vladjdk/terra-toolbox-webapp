@@ -16,7 +16,7 @@ import { addressState } from "../data/wallet";
         total_supply: string
     }
   
-    export const useContract = (contractAddress: AccAddress) => {
+    export const useCW20Contract = (contractAddress: AccAddress) => {
         // const { post } = useWallet();
         // const fee = useFee();
         const userWalletAddr = useRecoilValue(addressState);
