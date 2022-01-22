@@ -1,8 +1,7 @@
-import { Int, Fee, MsgExecuteContract } from "@terra-money/terra.js";
+import { MsgExecuteContract } from "@terra-money/terra.js";
 import { useConnectedWallet, useLCDClient } from "@terra-money/wallet-provider";
-import React, { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
-import "../style.css";
 import {
   CreateTxFailed,
   Timeout,
@@ -11,10 +10,10 @@ import {
   TxUnspecifiedError,
   UserDenied,
 } from "@terra-money/wallet-provider";
-import useAddress from "../hooks/useAddress";
+import useAddress from "hooks/useAddress";
 import { useRecoilValue } from "recoil";
 import { networkNameState } from "data/network";
-import { GasInfo } from "@terra-money/terra.proto/cosmos/base/abci/v1beta1/abci";
+import "style.css"
 
 export function QuerySample() {
   const lcd = useLCDClient();

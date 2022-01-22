@@ -34,6 +34,9 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@mui/material": "^5.3.0",
     "@terra-money/terra.js": "^3.0.2",
     "@terra-money/wallet-provider": "^3.6.5",
     "bignumber.js": "^9.0.2",
@@ -42,13 +45,14 @@
     "ramda": "^0.28.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router-dom": "^5.3.0",
+    "react-router-dom": "^6.2.1",
     "recoil": "^0.5.2",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.15.0",
     "@types/jest": "^27.0.2",
+    "@types/muicss": "^0.9.4",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
     "buffer": "^6.0.3",
