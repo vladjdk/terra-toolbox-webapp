@@ -89,15 +89,18 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         });
     }
 
-    function activateBids(collateralTokenContract: string, bidIdx: string) {
-        const executeMsg = _createExecuteMsg(
-            {
-                activate_bids: {
-                    bids_idx: bidIdx,
-                    collateral_token: collateralTokenContract
-                }
+    function activateBids(collateralTokenContract: string, bidIdx?: string[]) {
+        const msg = {
+            activate_bids: {
+                collateral_token: collateralTokenContract
             }
-        )
+        } as any;
+
+        if (bidIdx) {
+            msg.activate_bids.bids_idx = bidIdx;
+        }
+        
+        const executeMsg = _createExecuteMsg(msg);
       
         return post({
             msgs: [executeMsg],
@@ -105,14 +108,18 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         });
     }
 
-    function claimLiquidations(collateralTokenContract: string) {
-        const executeMsg = _createExecuteMsg(
-            {
-                claim_liquidations: {
-                    collateral_token: collateralTokenContract
-                }
+    function claimLiquidations(collateralTokenContract: string, bidIdx?: string[]) {
+        const msg = {
+            claim_liquidations: {
+                collateral_token: collateralTokenContract
             }
-        )
+        } as any;
+
+        if (bidIdx) {
+            msg.claim_liquidations.bids_idx = bidIdx;
+        }
+        
+        const executeMsg = _createExecuteMsg(msg)
       
         return post({
             msgs: [executeMsg],
