@@ -95,7 +95,6 @@ export default function LiquidationBidChart() {
 
     const renderGraph = () => {
         if (data) {
-            console.log(data);
             return (
                 <Stack sx={{padding: '10px'}}>
                     <Typography variant="h4" sx={{margin: '10px'}}>
