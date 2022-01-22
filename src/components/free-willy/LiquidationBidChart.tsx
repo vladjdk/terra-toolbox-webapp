@@ -59,7 +59,7 @@ const defaultData = {
 export default function LiquidationBidChart() {
     const network = useNetwork();
     const {getBidPoolsByCollateral} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
-    const [data, setData] = useState<any>();
+    const [data, setData] = useState<any>(defaultData);
 
     const formatRate = (rate: string) => {
         return `${(Math.round(parseFloat(rate) * 100)).toString()}%`;
@@ -93,36 +93,15 @@ export default function LiquidationBidChart() {
         })
     }, []);
 
-    const renderGraph = () => {
-        if (data) {
-            return (
-                <Stack sx={{padding: '10px'}}>
-                    <Typography variant="h4" sx={{margin: '10px'}}>
-                        Liquidation Bids
-                    </Typography>
-                    <Bar
-                        options={options}
-                        data={data}
-                    />
-                </Stack>
-            )
-        } else {
-            // TODO: Add loading animation.
-            return (
-                <Stack sx={{padding: '10px'}}>
-                    <Typography variant="h4" sx={{margin: '10px'}}>
-                        Liquidation Bids
-                    </Typography>
-                    <Bar
-                        options={options}
-                        data={defaultData}
-                    />
-                </Stack>
-            )
-        }
-    }
-
     return (
-        renderGraph()
+        <Stack sx={{padding: '10px'}}>
+            <Typography variant="h4" sx={{margin: '10px'}}>
+                Liquidation Bids
+            </Typography>
+            <Bar
+                options={options}
+                data={data}
+            />
+        </Stack>
     )
 }
