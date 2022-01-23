@@ -58,6 +58,7 @@ const defaultData = {
 
 export default function LiquidationBidChart() {
     const network = useNetwork();
+    
     const {getBidPoolsByCollateral} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     const [data, setData] = useState<any>(defaultData);
 
