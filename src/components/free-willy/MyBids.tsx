@@ -60,22 +60,23 @@ export default function MyBids() {
             })
         }
     }, [wallet])
-
+    
     return (
         <Stack sx={{padding: '10px'}}>
-            <Typography variant="h4" sx={{margin: '10px'}}>
-                My Bids
-            </Typography>
-            <div style={{ height: 300 }}>
-                <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    pageSize={30}
-                    rowsPerPageOptions={[30]}
-                    checkboxSelection
-                    disableSelectionOnClick
-                />
-            </div>
+        <Typography variant="h4" sx={{margin: '10px'}}>
+        My Bids
+        </Typography>
+        <div style={{ height: 300 }}>
+        <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={30}
+        rowsPerPageOptions={[30]}
+        checkboxSelection
+        disableSelectionOnClick
+        />
+        </div>
         </Stack>
-    );
-  }
+        );
+    }
+    
