@@ -59,8 +59,8 @@ export default function MyBids() {
                 }))
             })
         }
-    }, [wallet])
-    
+    }, [wallet, network])
+
     return (
         <Stack sx={{padding: '10px'}}>
         <Typography variant="h4" sx={{margin: '10px'}}>

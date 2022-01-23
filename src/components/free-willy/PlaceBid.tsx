@@ -9,7 +9,8 @@ export default function PlaceBid() {
     const lcd = useLCDClient();
     const wallet = useConnectedWallet();
     const [uusdBalance, setUusdBalance] = useState<number>(0);
-    const [premium, setPremium] = useState<number>(0)
+    const [premium, setPremium] = useState<number>(0);
+    const [bid, setBid] = useState<number>()
     
     const { submitBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
 
@@ -23,9 +24,18 @@ export default function PlaceBid() {
         }
     }, [wallet, network])
 
+    const fromMicro = (value: number) => {
+        return value / 1000000;
+    }
+
     const onPremiumChange = (e: any) => {
         const newPremium = Math.min(Math.max(Math.round(parseInt(e.target.value)), 0), 30);
-        console.log(newPremium)
+        setPremium(newPremium);
+    }
+
+    const onBidAmountChange = (e: any) => {
+        const newBid = Math.min(Math.max(parseFloat(e.target.value), 0), fromMicro(uusdBalance));
+        setBid(newBid)
     }
 
     return (
@@ -58,8 +68,10 @@ export default function PlaceBid() {
                 }}
                 inputProps={{
                     min: 0,
-                    max: uusdBalance
+                    max: fromMicro(uusdBalance)
                 }}
+                onChange={onBidAmountChange}
+                value={bid}
                 variant="filled"
             />
             <Button variant="contained">Place Bid</Button>

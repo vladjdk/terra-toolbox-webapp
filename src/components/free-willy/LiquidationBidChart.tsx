@@ -81,19 +81,19 @@ export default function LiquidationBidChart() {
                 labels,
                 datasets: [
                     {
-                    label: 'bLuna Bids',
-                    data: blunaPools.bid_pools.map(pool => formatBidAmount(pool.total_bid_amount)),
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        label: 'bLuna Bids',
+                        data: blunaPools.bid_pools.map(pool => formatBidAmount(pool.total_bid_amount)),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
                     },
                     {
-                    label: 'bEth Bids',
-                    data: bethPools.bid_pools.map(pool => formatBidAmount(pool.total_bid_amount)),
-                    backgroundColor: 'rgba(132, 99, 255, 0.5)',
+                        label: 'bEth Bids',
+                        data: bethPools.bid_pools.map(pool => formatBidAmount(pool.total_bid_amount)),
+                        backgroundColor: 'rgba(132, 99, 255, 0.5)'
                     }
                 ],
             })
         })
-    }, []);
+    }, [network]);
 
     return (
         <Stack sx={{padding: '10px'}}>
