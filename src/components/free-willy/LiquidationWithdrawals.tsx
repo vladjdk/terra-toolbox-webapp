@@ -1,8 +1,6 @@
-import { MsgExecuteContract } from "@terra-money/terra.js";
 import { useConnectedWallet, useLCDClient, useWallet } from "@terra-money/wallet-provider";
 import { useAnchorLiquidationContract } from "hooks/useAnchorLiquidationContract";
-import { useCallback, useEffect, useState } from "react";
-import BigNumber from "bignumber.js";
+import { useEffect, useState } from "react";
 import {
   CreateTxFailed,
   Timeout,
@@ -13,13 +11,12 @@ import {
 } from "@terra-money/wallet-provider";
 import 'components/free-willy/liquidation-withdrawals.css';
 import useNetwork from "hooks/useNetwork";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
 
 export default function LiquidationWithdrawals() {
   const network = useNetwork();
   const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
 
-  const lcd = useLCDClient();
   const connectedWallet = useConnectedWallet();
 
   interface Bid {
@@ -53,10 +50,10 @@ export default function LiquidationWithdrawals() {
     return (bidAmount / 1000000);
   }
 
-  const claimBETH = () => {
-    const claimLiquidationsPromise = claimLiquidations(network.contracts.beth).then(data => {
+  const claim = (contract: string) => {
+    setOpen(true);
+    claimLiquidations(contract).then(data => {
       setTxInfo(data);
-      setOpen(true);
     }).catch((error: unknown) => {
       if (error instanceof UserDenied) {
         setTxError('User Denied');
@@ -97,8 +94,10 @@ export default function LiquidationWithdrawals() {
         })
         console.log(collaterals)
       })
-  }
-  }, [connectedWallet])
+    } else {
+      setCollaterals(null);
+    }
+  }, [connectedWallet, txInfo])
 
   return (
     <div>
@@ -106,10 +105,10 @@ export default function LiquidationWithdrawals() {
           <Typography variant="h4" sx={{margin: '10px'}}>
                   Withdraw Liquidations
           </Typography>
-          <p>{collaterals?.bluna} bLuna</p>
-          <Button variant="contained" onClick={claimBETH} disabled={collaterals === null || collaterals?.bluna==0}>Withdraw bLuna</Button>
-          <p>{collaterals?.beth} bEth</p>
-          <Button variant="contained" onClick={claimBETH} disabled={collaterals === null || collaterals?.beth==0}>Withdraw bETH</Button>
+          <Typography variant="h6">{collaterals?.bluna} bLuna</Typography>
+          <Button variant="contained" onClick={() => {claim(network.contracts.bluna)}} disabled={collaterals === null || collaterals?.bluna==0}>Withdraw bLuna</Button>
+          <Typography variant="h6">{collaterals?.beth} bEth</Typography>
+          <Button variant="contained" onClick={() => {claim(network.contracts.beth)}} disabled={collaterals === null || collaterals?.beth==0}>Withdraw bETH</Button>
         </Stack>
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>Withdrawal Transaction</DialogTitle>
@@ -120,15 +119,20 @@ export default function LiquidationWithdrawals() {
                             Transaction: {txInfo?.success}
                         </DialogContentText>
                         <DialogContentText id="alert-dialog-slide-description">
-                          {txInfo ? <a
-                            href={`https://finder.terra.money/${connectedWallet?.network.chainID}/tx/${txInfo?.result.txhash}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open Tx Result in Terra Finder
-                          </a>
+                          {txInfo ? 
+                            <a
+                              href={`https://finder.terra.money/${connectedWallet?.network.chainID}/tx/${txInfo?.result.txhash}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open Tx Result in Terra Finder
+                            </a>
                           :
-                          <p>Loading</p> //todo: loading anim
+                            txError ?
+                            <p>{txError}</p>
+                          :
+                            <p>Loading</p> 
+                          //todo: loading anim
                           }
                         </DialogContentText>
                         <Stack spacing={2} direction="row" sx={{justifyContent: 'center'}}>
