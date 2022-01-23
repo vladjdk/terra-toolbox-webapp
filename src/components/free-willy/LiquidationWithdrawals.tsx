@@ -1,4 +1,4 @@
-import { useConnectedWallet, useLCDClient, useWallet } from "@terra-money/wallet-provider";
+import { useConnectedWallet } from "@terra-money/wallet-provider";
 import { useAnchorLiquidationContract } from "hooks/useAnchorLiquidationContract";
 import { useEffect, useState } from "react";
 import {
@@ -18,23 +18,6 @@ export default function LiquidationWithdrawals() {
     const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     
     const connectedWallet = useConnectedWallet();
-    
-    interface Bid {
-        idx: number;
-        collateral_token: string;
-        premium_slot: number;
-        bidder: string;
-        amount: number;
-        product_snapshot: number;
-        sum_snapshop: number;
-        pending_liquidated_collateral: number;
-        wait_end: number;
-        epoch_snapshot: number;
-        scale_snapshot: number;
-    }
-    interface BidsByUserResponse {
-        bids: Array<Bid>;
-    }
     
     interface Collaterals {
         bluna: number,
@@ -100,7 +83,7 @@ export default function LiquidationWithdrawals() {
             }, [connectedWallet, txInfo])
             
             return (
-                <div>
+                <>
                 <Stack padding="10px">
                 <Typography variant="h4" sx={{margin: '10px'}}>
                 Withdraw Liquidations
@@ -145,7 +128,7 @@ export default function LiquidationWithdrawals() {
             }
             </DialogContent>
             </Dialog>
-            </div>
+            </>
             );
         }
         

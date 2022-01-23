@@ -8,22 +8,22 @@ export function FreeWilly() {
     return (
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
             <Grid container spacing={2} >
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
                         <LiquidationBidChart/>
                     </Paper>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
                         <PlaceBid />
                     </Paper>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
                         <LiquidationWithdrawals />
                     </Paper>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
                         <MyBids />
                     </Paper>
