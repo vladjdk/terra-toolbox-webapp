@@ -1,16 +1,24 @@
-import { Button, Stack, Typography, TextField } from '@mui/material';
+import { Button, Stack, Typography, TextField, Select, MenuItem, InputLabel, NativeSelect } from '@mui/material';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 import { useAnchorLiquidationContract } from 'hooks/useAnchorLiquidationContract';
 import useNetwork from 'hooks/useNetwork';
 import { useEffect, useState } from 'react';
+
+enum Markets {
+    bluna, beth
+}
+
+const MIN_PREMIUM = 1;
+const MAX_PREMIUM = 30;
 
 export default function PlaceBid() {
     const network = useNetwork();
     const lcd = useLCDClient();
     const wallet = useConnectedWallet();
     const [uusdBalance, setUusdBalance] = useState<number>(0);
-    const [premium, setPremium] = useState<number>(0);
-    const [bid, setBid] = useState<number>()
+    const [market, setMarket] = useState<Markets>(Markets.bluna);
+    const [premium, setPremium] = useState<number>(1);
+    const [bid, setBid] = useState<number>(0)
     
     const { submitBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
 
@@ -29,7 +37,7 @@ export default function PlaceBid() {
     }
 
     const onPremiumChange = (e: any) => {
-        const newPremium = Math.min(Math.max(Math.round(parseInt(e.target.value)), 0), 30);
+        const newPremium = Math.min(Math.max(Math.round(parseInt(e.target.value)), MIN_PREMIUM), MAX_PREMIUM);
         setPremium(newPremium);
     }
 
@@ -38,11 +46,43 @@ export default function PlaceBid() {
         setBid(newBid)
     }
 
+    const onMarketChange = (e: any) => {
+        setMarket(parseInt(e.target.value) as Markets)
+    }
+
+    const onPlaceBid = () => {
+        const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
+        submitBid(bid, collateralToken, premium).then(data => {
+            console.log(data)
+        })
+    }
+
+    const canBid = () => {
+        if (!wallet) {
+            return false;
+        }
+        if (bid <= 0 || bid > fromMicro(uusdBalance)) {
+            return false;
+        }
+        if (premium < MIN_PREMIUM || premium > MAX_PREMIUM) {
+            return false;
+        }
+        return true;
+    }
+
     return (
-        <Stack sx={{padding: '10px'}}>
+        <Stack spacing={1} sx={{padding: '10px'}}>
             <Typography variant="h4" sx={{margin: '10px'}}>
                 Place Bids {uusdBalance / 1000000}
             </Typography>
+            <InputLabel id="market-select-label">Collateral Market</InputLabel>
+            <Select
+                value={market}
+                onChange={onMarketChange}
+            >
+                <MenuItem value={Markets.bluna}>bLuna</MenuItem>
+                <MenuItem value={Markets.beth}>bEth</MenuItem>
+            </Select>
             <TextField
                 id="filled-number"
                 label="Premium (%)"
@@ -52,8 +92,8 @@ export default function PlaceBid() {
                 }}
                 inputProps={{
                     step: 1,
-                    min: 0,
-                    max: 30
+                    min: MIN_PREMIUM,
+                    max: MAX_PREMIUM
                 }}
                 onChange={onPremiumChange}
                 value={premium}
@@ -74,7 +114,7 @@ export default function PlaceBid() {
                 value={bid}
                 variant="filled"
             />
-            <Button variant="contained">Place Bid</Button>
+            <Button disabled={!canBid()} variant="contained" onClick={onPlaceBid} >Place Bid</Button>
         </Stack>
     );
   }
