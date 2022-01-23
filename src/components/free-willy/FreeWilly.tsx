@@ -2,25 +2,33 @@ import LiquidationWithdrawals from 'components/free-willy/LiquidationWithdrawals
 import LiquidationBidChart from 'components/free-willy/LiquidationBidChart';
 import PlaceBid from 'components/free-willy/PlaceBid';
 import MyBids from 'components/free-willy/MyBids';
-import { Container, Stack, Paper } from '@mui/material';
+import { Container, Paper, Grid } from '@mui/material';
 
 export function FreeWilly() {
     return (
-        <Container sx={{maxWidth: '1200px'}}>
-            <Stack spacing={2} sx={{margin: '10px 0px'}}>
-                <Paper elevation={3}>
-                    <LiquidationBidChart/>
-                </Paper>
-                <Paper elevation={3}>
-                    <PlaceBid />
-                </Paper>
-                <Paper elevation={3}>
-                    <MyBids />
-                </Paper>
-                <Paper elevation={3}>
-                    <LiquidationWithdrawals />
-                </Paper>
-            </Stack>
+        <Container sx={{maxWidth: '1200px', padding: '10px'}}>
+            <Grid container spacing={2} >
+                <Grid item xs={12} sm={12}>
+                    <Paper elevation={3}>
+                        <LiquidationBidChart/>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3}>
+                        <PlaceBid />
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3}>
+                        <LiquidationWithdrawals />
+                    </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                    <Paper elevation={3}>
+                        <MyBids />
+                    </Paper>
+                </Grid>
+            </Grid>
         </Container>
     );
   }

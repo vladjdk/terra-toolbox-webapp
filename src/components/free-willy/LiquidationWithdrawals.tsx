@@ -1,343 +1,134 @@
-import { MsgExecuteContract } from "@terra-money/terra.js";
-import { useConnectedWallet, useLCDClient } from "@terra-money/wallet-provider";
-import { useCallback, useEffect, useState } from "react";
-import BigNumber from "bignumber.js";
+import { useConnectedWallet } from "@terra-money/wallet-provider";
+import { useAnchorLiquidationContract } from "hooks/useAnchorLiquidationContract";
+import { useEffect, useState } from "react";
 import {
-  CreateTxFailed,
-  Timeout,
-  TxFailed,
-  TxResult,
-  TxUnspecifiedError,
-  UserDenied,
+    CreateTxFailed,
+    Timeout,
+    TxFailed,
+    TxResult,
+    TxUnspecifiedError,
+    UserDenied,
 } from "@terra-money/wallet-provider";
-import useAddress from "hooks/useAddress";
-import { useRecoilValue } from "recoil";
-import { networkNameState } from "data/network";
 import 'components/free-willy/liquidation-withdrawals.css';
-import "style.css"
+import useNetwork from "hooks/useNetwork";
+import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
 
 export default function LiquidationWithdrawals() {
-  const lcd = useLCDClient();
-  const connectedWallet = useConnectedWallet();
-
-  var luna_bid_idx = Array<number>();
-  var eth_bid_idx = Array<number>();
-
-  const [luna_status, setLunaStatus] = useState<null | string>();
-  const [total_luna_bids, setLunaTotalBids] = useState<null | string>();
-  const [luna_bids, setLunaBids] = useState<null | Array<number>>();
-  const [pending_luna_collection, setLunaPendingCollection] = useState<
-    null | string
-  >();
-  const [luna_error, setLunaError] = useState<null | string>();
-  const [luna_tx_error, setLunaTxError] = useState<null | string>();
-  const [luna_tx_result, setLunaTxResult] = useState<null | TxResult>();
-
-  const [eth_status, setEthStatus] = useState<null | string>();
-  const [total_eth_bids, setEthTotalBids] = useState<null | string>();
-  const [eth_bids, setEthBids] = useState<null | Array<number>>();
-  const [pending_eth_collection, setEthPendingCollection] = useState<
-    null | string
-  >();
-  const [eth_error, setEthError] = useState<null | string>();
-  const [eth_tx_error, setEthTxError] = useState<null | string>();
-  const [eth_tx_result, setEthTxResult] = useState<null | TxResult>();
-
-  interface Bid {
-    idx: number;
-    collateral_token: string;
-    premium_slot: number;
-    bidder: string;
-    amount: number;
-    product_snapshot: number;
-    sum_snapshop: number;
-    pending_liquidated_collateral: number;
-    wait_end: number;
-    epoch_snapshot: number;
-    scale_snapshot: number;
-  }
-  interface BidsByUserResponse {
-    bids: Array<Bid>;
-  }
-
-  const withdrawLuna = useCallback(() => {
-    if (!connectedWallet) {
-      return;
+    const network = useNetwork();
+    const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+    
+    const connectedWallet = useConnectedWallet();
+    
+    interface Collaterals {
+        bluna: number,
+        beth: number
     }
-
-    if (!connectedWallet.network.chainID.startsWith("columbus")) {
-      alert(`Please only execute this example on Mainnet`);
-      return;
+    
+    const [collaterals, setCollaterals] = useState<Collaterals | null>();
+    const [txInfo, setTxInfo] = useState<TxResult | null>();
+    const [txError, setTxError] = useState<string | null>();
+    const [open, setOpen] = useState<boolean>(false);
+    
+    const formatCollateralAmount = (bidAmount: number) => {
+        return (bidAmount / 1000000);
     }
-
-    //   setTxResult(null);
-    //   setTxError(null);
-
-    connectedWallet
-      .post({
-        msgs: [
-          new MsgExecuteContract(
-            connectedWallet.walletAddress,
-            "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u",
-            {
-              claim_liquidations: {
-                collateral_token:
-                  "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
-                bids_idx: luna_bid_idx,
-              },
-            }
-          ),
-        ],
-        //   memo: "TerraToolbox.com"
-      })
-      .then((nextTxResult: TxResult) => {
-        console.log(nextTxResult);
-        setLunaTxResult(nextTxResult);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof UserDenied) {
-          setLunaTxError("User Denied");
-        } else if (error instanceof CreateTxFailed) {
-          setLunaTxError("Create Tx Failed: " + error.message);
-        } else if (error instanceof TxFailed) {
-          setLunaTxError("Tx Failed: " + error.message);
-        } else if (error instanceof Timeout) {
-          setLunaTxError("Timeout");
-        } else if (error instanceof TxUnspecifiedError) {
-          setLunaTxError("Unspecified Error: " + error.message);
-        } else {
-          setLunaTxError(
-            "Unknown Error: " +
-              (error instanceof Error ? error.message : String(error))
-          );
+    
+    const claim = (contract: string) => {
+        setOpen(true);
+        claimLiquidations(contract).then(data => {
+            setTxInfo(data);
+        }).catch((error: unknown) => {
+            if (error instanceof UserDenied) {
+                setTxError('User Denied');
+            } else if (error instanceof CreateTxFailed) {
+                setTxError('Create Tx Failed: ' + error.message);
+            } else if (error instanceof TxFailed) {
+                setTxError('Tx Failed: ' + error.message);
+            } else if (error instanceof Timeout) {
+                setTxError('Timeout');
+            } else if (error instanceof TxUnspecifiedError) {
+                setTxError('Unspecified Error: ' + error.message);
+            } else {
+                setTxError(
+                    'Unknown Error: ' +
+                    (error instanceof Error ? error.message : String(error)),
+                    );
+                }
+            });
         }
-      });
-  }, [connectedWallet]);
-
-  const withdrawEth = useCallback(() => {
-    if (!connectedWallet) {
-      return;
-    }
-
-    if (!connectedWallet.network.chainID.startsWith("columbus")) {
-      alert(`Please only execute this example on Mainnet`);
-      return;
-    }
-
-    //   setTxResult(null);
-    //   setTxError(null);
-
-    connectedWallet
-      .post({
-        msgs: [
-          new MsgExecuteContract(
-            connectedWallet.walletAddress,
-            "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u",
-            {
-              claim_liquidations: {
-                collateral_token:
-                  "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
-                bids_idx: luna_bid_idx,
-              },
-            }
-          ),
-        ],
-        //   memo: "TerraToolbox.com"
-      })
-      .then((nextTxResult: TxResult) => {
-        console.log(nextTxResult);
-        setLunaTxResult(nextTxResult);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof UserDenied) {
-          setLunaTxError("User Denied");
-        } else if (error instanceof CreateTxFailed) {
-          setLunaTxError("Create Tx Failed: " + error.message);
-        } else if (error instanceof TxFailed) {
-          setLunaTxError("Tx Failed: " + error.message);
-        } else if (error instanceof Timeout) {
-          setLunaTxError("Timeout");
-        } else if (error instanceof TxUnspecifiedError) {
-          setLunaTxError("Unspecified Error: " + error.message);
-        } else {
-          setLunaTxError(
-            "Unknown Error: " +
-              (error instanceof Error ? error.message : String(error))
-          );
+        
+        const handleClose = () => {
+            setTxInfo(null);
+            setOpen(false);
         }
-      });
-  }, [connectedWallet]);
-
-  useEffect(() => {
-    if (connectedWallet) {
-      //bLUNA
-      lcd.wasm
-        .contractQuery<BidsByUserResponse>(
-          "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u",
-          {
-            bids_by_user: {
-              collateral_token: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
-              bidder: connectedWallet.walletAddress,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.bids.length > 0) {
-            setLunaStatus("Available");
-
-            var total_bids = new BigNumber(0);
-            var pending_collection = new BigNumber(0);
-            for (var i = 0; i < res.bids.length; i++) {
-              luna_bid_idx.push(res.bids[i].idx);
-              total_bids = total_bids.plus(new BigNumber(res.bids[i].amount));
-              pending_collection = pending_collection.plus(
-                new BigNumber(res.bids[i].pending_liquidated_collateral)
-              );
+        
+        
+        useEffect(() => {
+            if (connectedWallet) {
+                const bethCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.beth);
+                const blunaCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.bluna);
+                
+                Promise.all([bethCollateralAmountPromise, blunaCollateralAmountPromise]).then((data) => {
+                    const [bethCollateral, blunaCollateral] = data;
+                    setCollaterals(
+                        {
+                            bluna: formatCollateralAmount(blunaCollateral),
+                            beth: formatCollateralAmount(bethCollateral)
+                        })
+                        console.log(collaterals)
+                    })
+                } else {
+                    setCollaterals(null);
+                }
+            }, [connectedWallet, txInfo])
+            
+            return (
+                <>
+                <Stack padding="10px">
+                <Typography variant="h4" sx={{margin: '10px'}}>
+                Withdraw Liquidations
+                </Typography>
+                <Typography variant="h6">{collaterals?.bluna} bLuna</Typography>
+                <Button variant="contained" onClick={() => {claim(network.contracts.bluna)}} disabled={collaterals === null || collaterals?.bluna==0}>Withdraw bLuna</Button>
+                <Typography variant="h6">{collaterals?.beth} bEth</Typography>
+                <Button variant="contained" onClick={() => {claim(network.contracts.beth)}} disabled={collaterals === null || collaterals?.beth==0}>Withdraw bETH</Button>
+                </Stack>
+                <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Withdrawal Transaction</DialogTitle>
+                <DialogContent>
+                {
+                    <>
+                    <DialogContentText id="alert-dialog-slide-description">
+                    Transaction: {txInfo?.success}
+                    </DialogContentText>
+                    <DialogContentText id="alert-dialog-slide-description">
+                    {txInfo ? 
+                        <a
+                        href={`https://finder.terra.money/${connectedWallet?.network.chainID}/tx/${txInfo?.result.txhash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        >
+                        Open Tx Result in Terra Finder
+                        </a>
+                        :
+                        txError ?
+                        <p>{txError}</p>
+                        :
+                        <p>Loading</p> 
+                        //todo: loading anim
+                    }
+                    </DialogContentText>
+                    <Stack spacing={2} direction="row" sx={{justifyContent: 'center'}}>
+                    <Button variant="contained" onClick={() => {
+                        handleClose();
+                    }
+                }>Close</Button>
+                </Stack>
+                </>
             }
-            setLunaBids(luna_bid_idx);
-            console.log(total_bids);
-            setLunaTotalBids(total_bids.dividedBy(1_000_000).toString());
-            setLunaPendingCollection(
-              pending_collection.dividedBy(1_000_000).toString()
-            );
-          } else {
-            setLunaStatus("Unavailable");
-          }
-        })
-        .catch((err) => {
-          setLunaError(err.toString());
-        });
-
-      //bETH
-      lcd.wasm
-        .contractQuery<BidsByUserResponse>(
-          "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u",
-          {
-            bids_by_user: {
-              collateral_token: "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
-              bidder: connectedWallet.walletAddress,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.bids.length > 0) {
-            setEthStatus("Available");
-            var total_bids = new BigNumber(0);
-            var pending_collection = new BigNumber(0);
-            for (var i = 0; i < res.bids.length; i++) {
-              total_bids = total_bids.plus(new BigNumber(res.bids[i].amount));
-              pending_collection = pending_collection.plus(
-                new BigNumber(res.bids[i].pending_liquidated_collateral)
-              );
-            }
-            setEthBids(eth_bid_idx);
-            console.log(total_bids);
-            setEthTotalBids(total_bids.dividedBy(1_000_000).toString());
-            setEthPendingCollection(
-              pending_collection.dividedBy(1_000_000).toString()
-            );
-          } else {
-            setEthStatus("Unavailable");
-          }
-        })
-        .catch((err) => {
-          setEthError(err.toString());
-        });
-      // lcd.bank.balance(connectedWallet.walletAddress).then(([coins]) => {
-      //   setBank(coins.toString());
-      // });
-    } else {
-      setEthTotalBids(null);
-    }
-  }, [connectedWallet, lcd]);
-
-  console.log("address", useAddress());
-  let networkName = useRecoilValue(networkNameState);
-  console.log("network: ", networkName);
-
-  return (
-    <div id="liquidation-withdrawals">
-        <div id="withdrawals">
-        <h1>Liquidation Withdrawals</h1>
-        <h2>bLUNA: {luna_status}</h2>
-        {/* {luna_bidder && <pre>Bidder: {luna_bidder}</pre>} */}
-        <p>
-            {total_luna_bids && <pre>Total bid amount: {total_luna_bids} UST</pre>}
-        </p>
-        <p>
-            {pending_luna_collection && (
-            <pre>Pending collection amount: {pending_luna_collection} bLUNA</pre>
-            )}
-        </p>
-        <p>{luna_error && <pre>Error: {luna_error}</pre>}</p>
-        {luna_bids && (
-            <pre>
-            bLUNA Bids:{" "}
-            {luna_bids.map((item) => {
-                return <p>{item}</p>;
-            })}
-            </pre>
-        )}
-        {!luna_tx_result &&
-        !luna_tx_error &&
-        pending_luna_collection &&
-        total_luna_bids?.length != 0 &&
-        luna_status &&
-        parseFloat(pending_luna_collection!.toString()) != 0 ? (
-            <button onClick={withdrawLuna}>
-            Withdraw {pending_luna_collection} bLUNA
-            </button>
-        ) : (
-            <button disabled onClick={withdrawLuna}>
-            Withdraw 0 bLUNA
-            </button>
-        )}
-        {luna_tx_result && (
-            <>
-            {connectedWallet && luna_tx_result && (
-                <div>
-                <a
-                    href={`https://finder.terra.money/${connectedWallet.network.chainID}/tx/${luna_tx_result.result.txhash}`}
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    Open Tx Result in Terra Finder
-                </a>
-                </div>
-            )}
+            </DialogContent>
+            </Dialog>
             </>
-        )}
-        <h2>bETH: {eth_status}</h2>
-        {/* {eth_bidder && <pre>Bidder: {eth_bidder}</pre>} */}
-        {total_eth_bids && <pre>Total bid amount: {total_eth_bids} UST</pre>}
-        {pending_eth_collection && (
-            <pre>Pending collection amount: {pending_eth_collection} bLUNA</pre>
-        )}
-        {eth_error && <pre>Error: {eth_error}</pre>}
-        {eth_bids && (
-            <pre>
-            bETH Bids:{" "}
-            {eth_bids.map((item) => {
-                return <p>{item}</p>;
-            })}
-            </pre>
-        )}
-        {!eth_tx_result &&
-        !eth_tx_error &&
-        pending_eth_collection &&
-        total_eth_bids?.length != 0 &&
-        eth_status &&
-        parseFloat(pending_eth_collection!.toString()) != 0 ? (
-            <button onClick={withdrawEth}>
-            Withdraw {pending_eth_collection} bLUNA
-            </button>
-        ) : (
-            <button disabled onClick={withdrawLuna}>
-            Withdraw 0 bETH
-            </button>
-        )}
-        {!connectedWallet && <p>Wallet not connected!</p>}
-        </div>
-    </div>
-  );
-}
+            );
+        }
+        

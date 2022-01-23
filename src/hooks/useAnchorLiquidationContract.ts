@@ -1,9 +1,9 @@
 import { AccAddress, Coins, MsgExecuteContract, Fee, Coin } from "@terra-money/terra.js";
 import { useRecoilValue } from "recoil";
 import { lcdClientQuery } from "../data/network";
-import { addressState } from "../data/wallet";
 import { TxResult, useWallet } from "@terra-money/wallet-provider";
 import useFee from "./useFee";
+import useAddress from "./useAddress";
   
 export interface BidPool {
     sum_snapshot: string,
@@ -41,7 +41,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
     const { post } = useWallet();
     // TODO: Calculate fee via simulation if possible.
     const fee = useFee();
-    const userWalletAddr = useRecoilValue(addressState);
+    const userWalletAddr = useAddress();
     const lcdClient = useRecoilValue(lcdClientQuery);
 
     function _query<T>(queryMsg: any) {
