@@ -16,6 +16,9 @@ import useNetwork from "hooks/useNetwork";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
 
 export default function LiquidationWithdrawals() {
+  const network = useNetwork();
+  const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+
   const lcd = useLCDClient();
   const connectedWallet = useConnectedWallet();
 
@@ -41,8 +44,6 @@ export default function LiquidationWithdrawals() {
     beth: number
   }
 
-  const network = useNetwork();
-  const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
   const [collaterals, setCollaterals] = useState<Collaterals | null>();
   const [txInfo, setTxInfo] = useState<TxResult | null>();
   const [txError, setTxError] = useState<string | null>();
@@ -83,19 +84,21 @@ export default function LiquidationWithdrawals() {
 
 
   useEffect(() => {
-    const bethCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.beth);
-    const blunaCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.bluna);
+    if (connectedWallet) {
+      const bethCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.beth);
+      const blunaCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.bluna);
 
-    Promise.all([bethCollateralAmountPromise, blunaCollateralAmountPromise]).then((data) => {
-      const [bethCollateral, blunaCollateral] = data;
-      setCollaterals(
-        {
-          bluna: formatCollateralAmount(blunaCollateral),
-          beth: formatCollateralAmount(bethCollateral)
+      Promise.all([bethCollateralAmountPromise, blunaCollateralAmountPromise]).then((data) => {
+        const [bethCollateral, blunaCollateral] = data;
+        setCollaterals(
+          {
+            bluna: formatCollateralAmount(blunaCollateral),
+            beth: formatCollateralAmount(bethCollateral)
+        })
+        console.log(collaterals)
       })
-      console.log(collaterals)
-    })
-  }, [])
+  }
+  }, [connectedWallet])
 
   return (
     <div>
