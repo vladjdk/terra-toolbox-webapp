@@ -24,13 +24,14 @@ export function TransactionDialog(props: TransactionDialogProps) {
     const lcdClient = useLCDClient();
     const wallet = useConnectedWallet();
     const [transactionState, setTransactionState] = useState<TransactionState>(TransactionState.signing);
+    const [link, setLink] = useState<string>();
 
     const {
         msgs,
         fee = undefined,
         title = 'Waiting for Transaction',
         pollingMsg = 'Please wait...',
-        successMsg = 'Transaction successful!',
+        successMsg = <p>Transaction successful!: <a href={link} target="_blank">[TX Info]</a></p>,
         failureMsg = 'Transaction failure!',
         onClose
     } = props;
@@ -45,6 +46,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
                     if (txInfo) {
                         if (txInfo.code === 0) {
                             setTransactionState(TransactionState.success);
+                            setLink(`https://finder.terra.money/${wallet?.network.chainID}/tx/${txInfo.txhash}`)
                         } else {
                             setTransactionState(TransactionState.fail);
                         }
