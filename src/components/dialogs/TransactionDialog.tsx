@@ -91,7 +91,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
     const renderNoSign = () => {
         return (
             <DialogContentText>
-                Client refused to sign.
+                <b>FAILURE:</b> Client refused to sign.
             </DialogContentText>
         )
     }
@@ -108,7 +108,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
         // TODO: Add link to tx
         return (
             <DialogContentText>
-                {successMsg}
+                <b>SUCCESS:</b> {successMsg}
             </DialogContentText>
         )
     }
@@ -117,7 +117,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
         // TODO: Add error from tx
         return (
             <DialogContentText>
-                {failureMsg}
+                <b>FAILURE:</b> {failureMsg}
             </DialogContentText>
         )
     }
@@ -125,7 +125,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
     const renderTimeout = () => {
         return (
             <DialogContentText>
-                Transaction Timeout
+                <b>FAILURE:</b> Transaction Timeout
             </DialogContentText>
         )
     }
