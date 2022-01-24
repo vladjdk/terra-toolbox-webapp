@@ -80,13 +80,13 @@ export default function LiquidationWithdrawals() {
                 } else {
                     setCollaterals(null);
                 }
-            }, [connectedWallet, txInfo])
+            }, [connectedWallet, txInfo, network])
             
             return (
                 <>
                 <Stack padding="10px">
                 <Typography variant="h4" sx={{margin: '10px'}}>
-                Withdraw Liquidations
+                    Withdraw Liquidations
                 </Typography>
                 <Typography variant="h6">{collaterals?.bluna} bLuna</Typography>
                 <Button variant="contained" onClick={() => {claim(network.contracts.bluna)}} disabled={collaterals === null || collaterals?.bluna==0}>Withdraw bLuna</Button>
@@ -122,7 +122,7 @@ export default function LiquidationWithdrawals() {
                     <Button variant="contained" onClick={() => {
                         handleClose();
                     }
-                }>Close</Button>
+                    }>Close</Button>
                 </Stack>
                 </>
             }

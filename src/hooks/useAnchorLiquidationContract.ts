@@ -1,7 +1,5 @@
 import { AccAddress, Coins, MsgExecuteContract, Fee, Coin } from "@terra-money/terra.js";
-import { useRecoilValue } from "recoil";
-import { lcdClientQuery } from "../data/network";
-import { TxResult, useWallet } from "@terra-money/wallet-provider";
+import { TxResult, useLCDClient, useWallet } from "@terra-money/wallet-provider";
 import useFee from "./useFee";
 import useAddress from "./useAddress";
   
@@ -42,7 +40,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
     // TODO: Calculate fee via simulation if possible.
     const fee = useFee();
     const userWalletAddr = useAddress();
-    const lcdClient = useRecoilValue(lcdClientQuery);
+    const lcdClient = useLCDClient();
 
     function _query<T>(queryMsg: any) {
         return lcdClient.wasm.contractQuery<T>(contractAddress, queryMsg);
@@ -57,8 +55,8 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         );
     }
 
-    function submitBid(inputAmount: number, collateralTokenContract: string, premiumSlot = 2): Promise<TxResult> {
-        const executeMsg = _createExecuteMsg(
+    function submitBid(inputAmount: number, collateralTokenContract: string, premiumSlot = 2): MsgExecuteContract {
+        return _createExecuteMsg(
             {
                 submit_bid: {
                     premium_slot: premiumSlot,
@@ -67,11 +65,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
             },
             [new Coin('uusd', inputAmount)]
         )
-      
-        return post({
-            msgs: [executeMsg],
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
-        });
     }
 
     function retractBid(bidIdx: string) {
@@ -139,6 +132,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
     // TODO: Queries for bids are limited to `limit`.
     //       Users with more than the `limit` may require an additional query.
     function getBidsByUser(collateralTokenContract: string, startAfter = '0', limit = 31): Promise<GetBidsByUserResponse> {
+        console.log(userWalletAddr)
         return _query<GetBidsByUserResponse>({
             bids_by_user: {
                 collateral_token: collateralTokenContract,
