@@ -1,8 +1,9 @@
-import { Button, Stack, Typography, TextField, Select, MenuItem, InputLabel, NativeSelect } from '@mui/material';
+import { Button, Stack, Typography, TextField, Select, MenuItem, InputLabel } from '@mui/material';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 import { useAnchorLiquidationContract } from 'hooks/useAnchorLiquidationContract';
 import useNetwork from 'hooks/useNetwork';
 import { useEffect, useState } from 'react';
+import { TransactionDialog } from 'components/dialogs/TransactionDialog';
 
 enum Markets {
     bluna, beth
@@ -18,7 +19,8 @@ export default function PlaceBid() {
     const [uusdBalance, setUusdBalance] = useState<number>(0);
     const [market, setMarket] = useState<Markets>(Markets.bluna);
     const [premium, setPremium] = useState<number>(1);
-    const [bid, setBid] = useState<number>(0)
+    const [bid, setBid] = useState<number>(0);
+    const [transactionData, setTransactionData] = useState<any>();
     
     const { submitBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
 
@@ -34,6 +36,10 @@ export default function PlaceBid() {
 
     const fromMicro = (value: number) => {
         return value / 1000000;
+    }
+
+    const toMicro = (value: number) => {
+        return value * 1000000;
     }
 
     const onPremiumChange = (e: any) => {
@@ -52,9 +58,7 @@ export default function PlaceBid() {
 
     const onPlaceBid = () => {
         const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
-        submitBid(bid, collateralToken, premium).then(data => {
-            console.log(data)
-        })
+        setTransactionData(submitBid(toMicro(bid), collateralToken, premium))
     }
 
     const canBid = () => {
@@ -115,6 +119,9 @@ export default function PlaceBid() {
                 variant="filled"
             />
             <Button disabled={!canBid()} variant="contained" onClick={onPlaceBid} >Place Bid</Button>
+            {transactionData && 
+                <TransactionDialog msgs={[transactionData]} onClose={() => setTransactionData(undefined)}/>
+            }
         </Stack>
     );
   }

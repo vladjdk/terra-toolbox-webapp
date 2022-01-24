@@ -55,8 +55,8 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         );
     }
 
-    function submitBid(inputAmount: number, collateralTokenContract: string, premiumSlot = 2): Promise<TxResult> {
-        const executeMsg = _createExecuteMsg(
+    function submitBid(inputAmount: number, collateralTokenContract: string, premiumSlot = 2): MsgExecuteContract {
+        return _createExecuteMsg(
             {
                 submit_bid: {
                     premium_slot: premiumSlot,
@@ -65,11 +65,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
             },
             [new Coin('uusd', inputAmount)]
         )
-      
-        return post({
-            msgs: [executeMsg],
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
-        });
     }
 
     function retractBid(bidIdx: string) {
