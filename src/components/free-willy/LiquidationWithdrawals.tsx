@@ -13,17 +13,22 @@ import 'components/free-willy/liquidation-withdrawals.css';
 import useNetwork from "hooks/useNetwork";
 import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
 
-export default function LiquidationWithdrawals() {
+interface LiquidationWithdrawalsProps {
+    bethClaim: number,
+    blunaClaim: number,
+    onClaim?: () => void
+}
+
+interface Collaterals {
+    bluna: number,
+    beth: number
+}
+
+export default function LiquidationWithdrawals(props: LiquidationWithdrawalsProps) {
+    const {bethClaim = 0, blunaClaim = 0, onClaim} = props;
     const network = useNetwork();
-    const {getFilledBidsPendingClaimAmount, claimLiquidations} = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
-    
+    const { claimLiquidations } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     const connectedWallet = useConnectedWallet();
-    
-    interface Collaterals {
-        bluna: number,
-        beth: number
-    }
-    
     const [collaterals, setCollaterals] = useState<Collaterals | null>();
     const [txInfo, setTxInfo] = useState<TxResult | null>();
     const [txError, setTxError] = useState<string | null>();
@@ -37,6 +42,9 @@ export default function LiquidationWithdrawals() {
         setOpen(true);
         claimLiquidations(contract).then(data => {
             setTxInfo(data);
+            if (onClaim) {
+                onClaim();
+            }
         }).catch((error: unknown) => {
             if (error instanceof UserDenied) {
                 setTxError('User Denied');
@@ -62,25 +70,12 @@ export default function LiquidationWithdrawals() {
             setOpen(false);
         }
         
-        
         useEffect(() => {
-            if (connectedWallet) {
-                const bethCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.beth);
-                const blunaCollateralAmountPromise = getFilledBidsPendingClaimAmount(network.contracts.bluna);
-                
-                Promise.all([bethCollateralAmountPromise, blunaCollateralAmountPromise]).then((data) => {
-                    const [bethCollateral, blunaCollateral] = data;
-                    setCollaterals(
-                        {
-                            bluna: formatCollateralAmount(blunaCollateral),
-                            beth: formatCollateralAmount(bethCollateral)
-                        })
-                        console.log(collaterals)
-                    })
-                } else {
-                    setCollaterals(null);
-                }
-            }, [connectedWallet, txInfo, network])
+                setCollaterals({
+                    bluna: formatCollateralAmount(blunaClaim),
+                    beth: formatCollateralAmount(bethClaim)
+                })
+            }, [blunaClaim, bethClaim])
             
             return (
                 <>

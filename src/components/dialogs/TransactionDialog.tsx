@@ -10,6 +10,8 @@ interface TransactionDialogProps {
     pollingMsg?: string,
     successMsg?: string,
     failureMsg?: string,
+    onSuccess?: (txInfo: TxInfo) => void,
+    onFail?: (txInfo: TxInfo) => void,
     onClose: () => void
 }
 
@@ -33,6 +35,8 @@ export function TransactionDialog(props: TransactionDialogProps) {
         pollingMsg = 'Please wait...',
         successMsg = <p>Transaction successful!: <a href={link} target="_blank">[TX Info]</a></p>,
         failureMsg = 'Transaction failure!',
+        onSuccess,
+        onFail,
         onClose
     } = props;
 
@@ -46,9 +50,15 @@ export function TransactionDialog(props: TransactionDialogProps) {
                     if (txInfo) {
                         if (txInfo.code === 0) {
                             setTransactionState(TransactionState.success);
-                            setLink(`https://finder.terra.money/${wallet?.network.chainID}/tx/${txInfo.txhash}`)
+                            setLink(`https://finder.terra.money/${wallet?.network.chainID}/tx/${txInfo.txhash}`);
+                            if (onSuccess) {
+                                onSuccess(txInfo);
+                            }
                         } else {
                             setTransactionState(TransactionState.fail);
+                            if (onFail) {
+                                onFail(txInfo);
+                            }
                         }
                     } else {
                         setTransactionState(TransactionState.timeout);
