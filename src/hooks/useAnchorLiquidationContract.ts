@@ -67,7 +67,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         )
     }
 
-    function retractBid(bidIdx: string[]) {
+    function retractBid(bidIdx: string) {
         const executeMsg = _createExecuteMsg(
             {
                 retract_bid: {
@@ -100,26 +100,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
             fee: new Fee(fee.gas, { uusd: fee.amount }),
         });
     }
-
-    function activateMultipleCollaterals(collaterals: string[]) {
-        const msgs: MsgExecuteContract[] = []
-        collaterals.forEach(collateral => {
-            const msg = {
-                activate_bids: {
-                    collateral_token: collateral
-                }
-            } as any;
-            msgs.push(_createExecuteMsg(msg));
-        });
-        
-
-      
-        return post({
-            msgs: msgs,
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
-        });
-    }
-    
 
     function claimLiquidations(collateralTokenContract: string, bidIdx?: string[]) {
         const msg = {
@@ -197,7 +177,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         submitBid,
         retractBid,
         activateBids,
-        activateMultipleCollaterals,
         claimLiquidations,
         getBidPoolsByCollateral,
         getBidsByUser,
