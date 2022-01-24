@@ -12,7 +12,12 @@ enum Markets {
 const MIN_PREMIUM = 1;
 const MAX_PREMIUM = 30;
 
-export default function PlaceBid() {
+interface PlaceBidProps {
+    onBidPlaced?: () => void
+}
+
+export default function PlaceBid(props: PlaceBidProps) {
+    const { onBidPlaced } = props;
     const network = useNetwork();
     const lcd = useLCDClient();
     const wallet = useConnectedWallet();
@@ -25,6 +30,10 @@ export default function PlaceBid() {
     const { submitBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
 
     useEffect(() => {
+        getBalance();
+    }, [wallet, network])
+
+    const getBalance = () => {
         if (wallet) {
             lcd.bank.balance(wallet.walletAddress).then(balance => {
                 const [coins,] = balance;
@@ -32,7 +41,7 @@ export default function PlaceBid() {
                 setUusdBalance(uusdBalance ? uusdBalance.amount.toNumber() : 0);
             })
         }
-    }, [wallet, network])
+    }
 
     const fromMicro = (value: number) => {
         return value / 1000000;
@@ -72,6 +81,13 @@ export default function PlaceBid() {
             return false;
         }
         return true;
+    }
+
+    const onBidSuccessful = () => {
+        getBalance();
+        if (onBidPlaced) {
+            onBidPlaced();
+        }
     }
 
     return (
@@ -128,7 +144,7 @@ export default function PlaceBid() {
             />
             <Button disabled={!canBid()} variant="contained" onClick={onPlaceBid} >Place Bid</Button>
             {transactionData && 
-                <TransactionDialog title="Place Bid" msgs={[transactionData]} onClose={() => setTransactionData(undefined)}/>
+                <TransactionDialog title="Place Bid" msgs={[transactionData]} onSuccess={onBidSuccessful} onClose={() => setTransactionData(undefined)}/>
             }
         </Stack>
     );

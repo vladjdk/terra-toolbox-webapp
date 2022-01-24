@@ -35,31 +35,28 @@ interface BidRow {
     collateral_token: string
 }
 
-export default function MyBids() {
+interface MyBidsProps {
+    bethBids: Bid[],
+    blunaBids: Bid[]
+}
+
+export default function MyBids(props: MyBidsProps) {
+    const { bethBids = [], blunaBids = [] } = props;
     const network = useNetwork();
-    const wallet = useConnectedWallet();
     const [rows, setRows] = useState<BidRow[]>([]);
-    const { getBidsByUser } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
-    
+
     useEffect(() => {
-        if (wallet) {
-            const bethBidsPromise = getBidsByUser(network.contracts.beth);
-            const blunaBidsPromise = getBidsByUser(network.contracts.bluna);
-            Promise.all([bethBidsPromise, blunaBidsPromise]).then(data => {
-                const [bethBids, blunaBids] = data;
-                const bids = [...bethBids.bids, ...blunaBids.bids];
-                setRows(bids.map(bid => {
-                    const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
-                    return {
-                        id: bid.idx,
-                        amount: `${parseInt(bid.amount) / 1000000} UST`,
-                        premium_slot: `${bid.premium_slot.toString()}%`,
-                        collateral_token: collateralName
-                    } as BidRow;
-                }))
-            })
-        }
-    }, [wallet, network])
+        const bids = [...bethBids, ...blunaBids];
+        setRows(bids.map(bid => {
+            const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
+            return {
+                id: bid.idx,
+                amount: `${parseInt(bid.amount) / 1000000} UST`,
+                premium_slot: `${bid.premium_slot.toString()}%`,
+                collateral_token: collateralName
+            } as BidRow;
+        }))
+    }, [bethBids, blunaBids, network])
 
     return (
         <Stack sx={{padding: '10px'}}>
