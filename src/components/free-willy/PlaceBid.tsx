@@ -76,9 +76,17 @@ export default function PlaceBid() {
 
     return (
         <Stack spacing={1} sx={{padding: '10px'}}>
-            <Typography variant="h4" sx={{margin: '10px'}}>
-                Place Bids {uusdBalance / 1000000}
-            </Typography>
+            <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={2}
+            >
+                <Typography variant="h4" sx={{margin: '10px'}}>
+                    Place Bid
+                </Typography>
+                <Button variant="contained" onClick={() => setBid(uusdBalance / 1000000)}>{uusdBalance / 1000000} UST</Button>
+            </Stack>
             <InputLabel id="market-select-label">Collateral Market</InputLabel>
             <Select
                 value={market}
@@ -120,7 +128,7 @@ export default function PlaceBid() {
             />
             <Button disabled={!canBid()} variant="contained" onClick={onPlaceBid} >Place Bid</Button>
             {transactionData && 
-                <TransactionDialog msgs={[transactionData]} onClose={() => setTransactionData(undefined)}/>
+                <TransactionDialog title="Place Bid" msgs={[transactionData]} onClose={() => setTransactionData(undefined)}/>
             }
         </Stack>
     );
