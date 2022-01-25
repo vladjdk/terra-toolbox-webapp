@@ -3,7 +3,6 @@ import { useAnchorLiquidationContract, Bid } from 'hooks/useAnchorLiquidationCon
 import useNetwork from 'hooks/useNetwork';
 import { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TxResult, useConnectedWallet } from '@terra-money/wallet-provider';
 import { TransactionDialog } from 'components/dialogs/TransactionDialog';
 import { MsgExecuteContract } from '@terra-money/terra.js';
 
@@ -41,14 +40,11 @@ interface BidRow {
     premium_slot: string,
     collateral_token: string,
     bid_status: string
-<<<<<<< HEAD
 }
 
 interface MyBidsProps {
     bethBids: Bid[],
     blunaBids: Bid[]
-=======
->>>>>>> activate-retract
 }
 
 export default function MyBids(props: MyBidsProps) {
@@ -63,28 +59,26 @@ export default function MyBids(props: MyBidsProps) {
     const { activateBids, activateMultipleCollaterals, getBidsByUser, retractBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     
     useEffect(() => {
-        if (wallet) {
-            const timestamp = Date.now()
-            const bethBidsPromise = getBidsByUser(network.contracts.beth);
-            const blunaBidsPromise = getBidsByUser(network.contracts.bluna);
-            Promise.all([bethBidsPromise, blunaBidsPromise]).then(data => {
-                const [bethBids, blunaBids] = data;
-                const bids = [...bethBids.bids, ...blunaBids.bids];
-                setRows(bids.map(bid => {
-                    console.log(timestamp/1000)
-                    console.log(bid.wait_end)
-                    const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
-                    return {
-                        id: bid.idx,
-                        amount: `${parseInt(bid.amount) / 1000000} UST`,
-                        premium_slot: `${bid.premium_slot.toString()}%`,
-                        collateral_token: collateralName,
-                        bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end)*1000 ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
-                    } as BidRow;
-                }))
-            })
-        }
-    }, [wallet, network, transactionData])
+        const timestamp = Date.now()
+        const bethBidsPromise = getBidsByUser(network.contracts.beth);
+        const blunaBidsPromise = getBidsByUser(network.contracts.bluna);
+        Promise.all([bethBidsPromise, blunaBidsPromise]).then(data => {
+            const [bethBids, blunaBids] = data;
+            const bids = [...bethBids.bids, ...blunaBids.bids];
+            setRows(bids.map(bid => {
+                console.log(timestamp/1000)
+                console.log(bid.wait_end)
+                const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
+                return {
+                    id: bid.idx,
+                    amount: `${parseInt(bid.amount) / 1000000} UST`,
+                    premium_slot: `${bid.premium_slot.toString()}%`,
+                    collateral_token: collateralName,
+                    bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end)*1000 ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
+                } as BidRow;
+            }))
+        })
+    }, [bethBids, blunaBids, network, transactionData])
 
     const activate = () => {
         setRetracting(false);
