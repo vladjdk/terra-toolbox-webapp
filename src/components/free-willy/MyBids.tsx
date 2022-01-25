@@ -41,11 +41,14 @@ interface BidRow {
     premium_slot: string,
     collateral_token: string,
     bid_status: string
+<<<<<<< HEAD
 }
 
 interface MyBidsProps {
     bethBids: Bid[],
     blunaBids: Bid[]
+=======
+>>>>>>> activate-retract
 }
 
 export default function MyBids(props: MyBidsProps) {
