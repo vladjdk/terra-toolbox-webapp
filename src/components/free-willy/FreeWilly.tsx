@@ -89,7 +89,7 @@ export function FreeWilly() {
                 </Grid>
                 <Grid item xs={12}>
                     <Paper elevation={3}>
-                        <MyBids bethBids={bethBids} blunaBids={blunaBids}/>
+                        <MyBids bethBids={bethBids} blunaBids={blunaBids} onClaim={getUserBids}/>
                     </Paper>
                 </Grid>
             </Grid>

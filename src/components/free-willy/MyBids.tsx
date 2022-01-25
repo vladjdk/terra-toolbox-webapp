@@ -44,11 +44,12 @@ interface BidRow {
 
 interface MyBidsProps {
     bethBids: Bid[],
-    blunaBids: Bid[]
+    blunaBids: Bid[],
+    onClaim?: () => void
 }
 
 export default function MyBids(props: MyBidsProps) {
-    const { bethBids = [], blunaBids = [] } = props;
+    const { bethBids = [], blunaBids = [], onClaim } = props;
     const network = useNetwork();
     const [rows, setRows] = useState<BidRow[]>([]);
     const [selectionModel, setSelectionModel] = useState<BidRow[]>();
@@ -56,29 +57,36 @@ export default function MyBids(props: MyBidsProps) {
     const [activatable, setActivatable] = useState<boolean>(false);
     const [retracting, setRetracting] = useState<boolean>(false);
     const [transactionData, setTransactionData] = useState<any>();
-    const { activateBids, activateMultipleCollaterals, getBidsByUser, retractBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+    const [timestamp, setTimestamp] = useState<any>();
+    const { activateBids, activateMultipleCollaterals, retractBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setTimestamp(Date.now() / 1000);
+        }, 1000)
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, [])
+    
     
     useEffect(() => {
-        const timestamp = Date.now()
-        const bethBidsPromise = getBidsByUser(network.contracts.beth);
-        const blunaBidsPromise = getBidsByUser(network.contracts.bluna);
-        Promise.all([bethBidsPromise, blunaBidsPromise]).then(data => {
-            const [bethBids, blunaBids] = data;
-            const bids = [...bethBids.bids, ...blunaBids.bids];
-            setRows(bids.map(bid => {
-                console.log(timestamp/1000)
-                console.log(bid.wait_end)
-                const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
-                return {
-                    id: bid.idx,
-                    amount: `${parseInt(bid.amount) / 1000000} UST`,
-                    premium_slot: `${bid.premium_slot.toString()}%`,
-                    collateral_token: collateralName,
-                    bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end)*1000 ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
-                } as BidRow;
-            }))
-        })
-    }, [bethBids, blunaBids, network, transactionData])
+        const bids = [...bethBids, ...blunaBids];
+        setRows(bids.map(bid => {
+            console.log(timestamp)
+            console.log(bid.wait_end)
+            const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
+            return {
+                id: bid.idx,
+                amount: `${parseInt(bid.amount) / 1000000} UST`,
+                premium_slot: `${bid.premium_slot.toString()}%`,
+                collateral_token: collateralName,
+                bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end) ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
+            } as BidRow;
+        }))
+    }, [bethBids, blunaBids, network, transactionData, timestamp])
 
     const activate = () => {
         setRetracting(false);
@@ -111,6 +119,12 @@ export default function MyBids(props: MyBidsProps) {
             bids_to_retract.push(retractBid(row.id));
         });
         setTransactionData(bids_to_retract)
+    }
+
+    const success = () => {
+        if(onClaim) {
+            onClaim();
+        }
     }
 
     return (
@@ -164,7 +178,7 @@ export default function MyBids(props: MyBidsProps) {
                 />
             </div>
             {transactionData && 
-                <TransactionDialog title={retracting ? "Bid Retraction" : "Bid Activation"} msgs={transactionData} onClose={() => setTransactionData(undefined)}/>
+                <TransactionDialog title={retracting ? "Bid Retraction" : "Bid Activation"} msgs={transactionData} onSuccess={success} onClose={() => setTransactionData(undefined)}/>
             }
         </Stack>  
     );
