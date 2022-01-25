@@ -1,10 +1,10 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import { Fee, TxInfo } from '@terra-money/terra.js';
+import { Fee, MsgExecuteContract, TxInfo } from '@terra-money/terra.js';
 import { TxResult, useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 import { useEffect, useState } from 'react';
 
 interface TransactionDialogProps {
-    msgs: any[],
+    msgs: MsgExecuteContract[],
     fee?: Fee,
     title?: string,
     pollingMsg?: string,
@@ -54,7 +54,8 @@ export function TransactionDialog(props: TransactionDialogProps) {
                         setTransactionState(TransactionState.timeout);
                     }
                 })
-            }).catch(() => {
+            }).catch((err) => {
+                console.log(err)
                 setTransactionState(TransactionState.noSign);
             })
         }
