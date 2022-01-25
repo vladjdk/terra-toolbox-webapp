@@ -45,11 +45,11 @@ interface BidRow {
 interface MyBidsProps {
     bethBids: Bid[],
     blunaBids: Bid[],
-    onClaim?: () => void
+    onBidUpdate?: () => void
 }
 
 export default function MyBids(props: MyBidsProps) {
-    const { bethBids = [], blunaBids = [], onClaim } = props;
+    const { bethBids = [], blunaBids = [], onBidUpdate } = props;
     const network = useNetwork();
     const [rows, setRows] = useState<BidRow[]>([]);
     const [selectionModel, setSelectionModel] = useState<BidRow[]>();
@@ -75,8 +75,6 @@ export default function MyBids(props: MyBidsProps) {
     useEffect(() => {
         const bids = [...bethBids, ...blunaBids];
         setRows(bids.map(bid => {
-            console.log(timestamp)
-            console.log(bid.wait_end)
             const collateralName = (bid.collateral_token === network.contracts.bluna) ? 'bLuna' : 'bEth';
             return {
                 id: bid.idx,
@@ -122,9 +120,28 @@ export default function MyBids(props: MyBidsProps) {
     }
 
     const success = () => {
-        if(onClaim) {
-            onClaim();
+        if(onBidUpdate) {
+            onBidUpdate();
         }
+    }
+
+    const selectionChange = (ids: Iterable<any>) => {
+        const selectedIDs = new Set(ids);
+            const selectedRowData = rows.filter((row) => selectedIDs.has(row.id.toString()));
+            setSelectionModel(selectedRowData);
+            if(selectedRowData.length>0) {
+                setRetractable(true)
+                var a = true;
+                selectedRowData.forEach(row => {
+                    if (row.bid_status != "Ready for activation") {
+                        a = false;
+                    }
+                });
+                setActivatable(a)
+            } else {
+                setRetractable(false)
+                setActivatable(false)
+            }
     }
 
     return (
@@ -156,24 +173,7 @@ export default function MyBids(props: MyBidsProps) {
                     disableColumnSelector
                     disableDensitySelector
                     onSelectionModelChange={(ids) => {
-                        const selectedIDs = new Set(ids);
-                        const selectedRowData = rows.filter((row) => selectedIDs.has(row.id.toString()));
-                        setSelectionModel(selectedRowData);
-                        if(selectedRowData.length>0) {
-                            setRetractable(true)
-                            var a = true;
-                            selectedRowData.forEach(row => {
-                                if (row.bid_status != "Ready for activation") {
-                                    a = false;
-                                }
-                            });
-                            setActivatable(a)
-                        } else {
-                            setRetractable(false)
-                            setActivatable(false)
-                        }
-                        console.log(activatable)
-                        console.log(retractable)
+                        selectionChange(ids);
                     }}
                 />
             </div>
