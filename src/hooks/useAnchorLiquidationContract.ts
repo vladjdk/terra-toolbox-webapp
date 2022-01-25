@@ -67,22 +67,17 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         )
     }
 
-    function retractBid(bidIdx: string) {
-        const executeMsg = _createExecuteMsg(
+    function retractBid(bidIdx: string): MsgExecuteContract {
+        return _createExecuteMsg(
             {
                 retract_bid: {
-                    bids_idx: bidIdx
+                    bid_idx: bidIdx
                 }
             }
         )
-      
-        return post({
-            msgs: [executeMsg],
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
-        });
     }
 
-    function activateBids(collateralTokenContract: string, bidIdx?: string[]) {
+    function activateBids(collateralTokenContract: string, bidIdx?: string[]): MsgExecuteContract {
         const msg = {
             activate_bids: {
                 collateral_token: collateralTokenContract
@@ -93,13 +88,22 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
             msg.activate_bids.bids_idx = bidIdx;
         }
         
-        const executeMsg = _createExecuteMsg(msg);
-      
-        return post({
-            msgs: [executeMsg],
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
-        });
+        return _createExecuteMsg(msg);
     }
+
+    function activateMultipleCollaterals(collaterals: string[]): MsgExecuteContract[] {
+        const msgs: MsgExecuteContract[] = []
+        collaterals.forEach(collateral => {
+            const msg = {
+                activate_bids: {
+                    collateral_token: collateral
+                }
+            } as any;
+            msgs.push(_createExecuteMsg(msg));
+        });
+        return msgs;
+    }
+    
 
     function claimLiquidations(collateralTokenContract: string, bidIdx?: string[]) {
         const msg = {
@@ -177,6 +181,7 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
         submitBid,
         retractBid,
         activateBids,
+        activateMultipleCollaterals,
         claimLiquidations,
         getBidPoolsByCollateral,
         getBidsByUser,
