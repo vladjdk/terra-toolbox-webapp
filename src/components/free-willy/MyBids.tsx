@@ -3,7 +3,9 @@ import { useAnchorLiquidationContract, Bid } from 'hooks/useAnchorLiquidationCon
 import useNetwork from 'hooks/useNetwork';
 import { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { useConnectedWallet } from '@terra-money/wallet-provider';
+import { TxResult, useConnectedWallet } from '@terra-money/wallet-provider';
+import { TransactionDialog } from 'components/dialogs/TransactionDialog';
+import { MsgExecuteContract } from '@terra-money/terra.js';
 
 const columns = [
     { 
@@ -53,7 +55,9 @@ export default function MyBids(props: MyBidsProps) {
     const [selectionModel, setSelectionModel] = useState<BidRow[]>();
     const [retractable, setRetractable] = useState<boolean>(false);
     const [activatable, setActivatable] = useState<boolean>(false);
-    const { activateBids, activateMultipleCollaterals, getBidsByUser } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+    const [retracting, setRetracting] = useState<boolean>(false);
+    const [transactionData, setTransactionData] = useState<any>();
+    const { activateBids, activateMultipleCollaterals, getBidsByUser, retractBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
     
     useEffect(() => {
         if (wallet) {
@@ -72,16 +76,17 @@ export default function MyBids(props: MyBidsProps) {
                         amount: `${parseInt(bid.amount) / 1000000} UST`,
                         premium_slot: `${bid.premium_slot.toString()}%`,
                         collateral_token: collateralName,
-                        bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end)*1000 ? "Ready for activation" : `${ Math.floor((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60)} minutes until activation`
+                        bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end)*1000 ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
                     } as BidRow;
                 }))
             })
         }
-    }, [wallet, network])
+    }, [wallet, network, transactionData])
 
     const activate = () => {
-        var beth_bids = [];
-        var bluna_bids = [];
+        setRetracting(false);
+        const beth_bids = [];
+        const bluna_bids = [];
         selectionModel?.forEach(row => {
             if(row.collateral_token == "bEth") {
                 beth_bids.push(row.id)
@@ -91,31 +96,37 @@ export default function MyBids(props: MyBidsProps) {
         });
 
         if(beth_bids.length > 0 && bluna_bids.length > 0) {
-            activateMultipleCollaterals([network.contracts.beth, network.contracts.bluna])
+            setTransactionData(activateMultipleCollaterals([network.contracts.beth, network.contracts.bluna]));
         } else {
             if(beth_bids.length > 0) {
-                activateBids(network.contracts.beth);
+                setTransactionData([activateBids(network.contracts.beth)]);
             }
-    
             if(bluna_bids.length > 0) {
-                activateBids(network.contracts.bluna);
+                setTransactionData([activateBids(network.contracts.bluna)]);
             }
         }
+    }
 
-
+    const retract = () => {
+        setRetracting(true)
+        const bids_to_retract: MsgExecuteContract[] = []
+        selectionModel?.forEach(row => {
+            bids_to_retract.push(retractBid(row.id));
+        });
+        setTransactionData(bids_to_retract)
     }
 
     return (
         <Stack sx={{padding: '10px'}}>
             <Grid container alignItems="center">
-                <Grid item md={9} xs={6}>
+                <Grid item md={8} xs={6}>
                     <Typography variant="h4" sx={{margin: '10px'}}>
                             My Bids
                     </Typography>
                 </Grid>
-                <Grid item md={3} xs={6} alignItems="right">
-                    <Button disabled={!retractable}>Retract Bid</Button>
-                    <Button disabled={!activatable} onClick={activate}>Activate Bid</Button>
+                <Grid item md={4} xs={6} alignItems="right">
+                    <Button sx={{margin:"5px"}} variant="contained" disabled={!retractable} onClick={retract}>Retract Bid{selectionModel?.length!=1?"s":""}</Button>
+                    <Button sx={{margin:"5px"}} variant="contained" disabled={!activatable} onClick={activate}>Activate Bid{selectionModel?.length!=1?"s":""}</Button>
                 </Grid>
             </Grid>
 
@@ -155,6 +166,9 @@ export default function MyBids(props: MyBidsProps) {
                     }}
                 />
             </div>
-        </Stack>
+            {transactionData && 
+                <TransactionDialog title={retracting ? "Bid Retraction" : "Bid Activation"} msgs={transactionData} onClose={() => setTransactionData(undefined)}/>
+            }
+        </Stack>  
     );
 }
