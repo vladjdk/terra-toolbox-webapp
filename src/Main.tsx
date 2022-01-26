@@ -34,6 +34,9 @@ export function Main() {
       text: {
         primary: 'rgba(255,255,255,0.87)',
         secondary: 'rgba(255,255,255,0.60)'
+      },
+      action: {
+        disabled: 'rgba(255,255,255,0.60)'
       }
     }
   });
