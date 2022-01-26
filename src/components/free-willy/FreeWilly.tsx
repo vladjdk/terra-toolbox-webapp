@@ -6,13 +6,15 @@ import { Container, Paper, Grid } from '@mui/material';
 import useNetwork from 'hooks/useNetwork';
 import { useAnchorLiquidationContract, BidPool, Bid } from 'hooks/useAnchorLiquidationContract';
 import { useEffect, useState } from 'react';
-import { useConnectedWallet } from '@terra-money/wallet-provider';
+import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 
 export function FreeWilly() {
     const network = useNetwork();
     const wallet = useConnectedWallet();
+    const lcd = useLCDClient();
 
     const { getBidPoolsByCollateral, getFilledBidsPendingClaimAmount, getBidsByUser } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
+    const [uusdBalance, setUusdBalance] = useState<number>(0);
     const [bethPools, setBethPools] = useState<BidPool[]>([]);
     const [blunaPools, setBlunaPools] = useState<BidPool[]>([]);
     const [bethBids, setBethBids] = useState<Bid[]>([]);
@@ -21,16 +23,24 @@ export function FreeWilly() {
     const [blunaClaim, setBlunaClaim] = useState<number>(0);
 
     useEffect(() => {
+        getUusdBalance().then()
+        getBidsPendingClaim().then()
+        getUserBids().then()
+    }, [wallet, network])
+
+    useEffect(() => {
         getBidPools().then()
     }, [network])
 
-    useEffect(() => {
-        getBidsPendingClaim().then()
-    }, [wallet, network])
-
-    useEffect(() => {
-        getUserBids().then()
-    }, [wallet, network])
+    const getUusdBalance = async () => {
+        if (wallet) {
+            lcd.bank.balance(wallet.walletAddress).then(balance => {
+                const [coins,] = balance;
+                const uusdBalance = coins.get('uusd');
+                setUusdBalance(uusdBalance ? uusdBalance.amount.toNumber() : 0);
+            })
+        }
+    }
 
     const getBidPools = async () => {
         Promise.all([
@@ -69,6 +79,13 @@ export function FreeWilly() {
         }
     }
 
+    const onRefresh = () => {
+        getUusdBalance().then()
+        getBidsPendingClaim().then()
+        getUserBids().then()
+        getBidPools().then()
+    }
+
     return (
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
             <Grid container spacing={2} >
@@ -79,17 +96,17 @@ export function FreeWilly() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
-                        <PlaceBid onBidPlaced={getUserBids}/>
+                        <PlaceBid uusdBalance={uusdBalance} onBidPlaced={onRefresh}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Paper elevation={3}>
-                        <LiquidationWithdrawals bethClaim={bethClaim} blunaClaim={blunaClaim} onClaim={getBidsPendingClaim}/>
+                        <LiquidationWithdrawals bethClaim={bethClaim} blunaClaim={blunaClaim} onClaim={onRefresh}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
                     <Paper elevation={3}>
-                        <MyBids bethBids={bethBids} blunaBids={blunaBids} onBidUpdate={getUserBids}/>
+                        <MyBids bethBids={bethBids} blunaBids={blunaBids} onBidUpdate={onRefresh}/>
                     </Paper>
                 </Grid>
             </Grid>
