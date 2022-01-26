@@ -1,5 +1,8 @@
 import { createTheme } from '@mui/material';
 
+export const primaryTextColor = 'rgba(255,255,255,0.87)';
+export const secondaryTextColor = 'rgba(255,255,255,0.60)';
+
 export const theme =  createTheme({
     palette: {
       primary: {
@@ -15,11 +18,11 @@ export const theme =  createTheme({
         paper: '#434343',
       },
       text: {
-        primary: 'rgba(255,255,255,0.87)',
-        secondary: 'rgba(255,255,255,0.60)'
+        primary: primaryTextColor,
+        secondary: secondaryTextColor
       },
       action: {
-        disabled: 'rgba(255,255,255,0.60)'
+        disabled: secondaryTextColor
       }
     }
   });
