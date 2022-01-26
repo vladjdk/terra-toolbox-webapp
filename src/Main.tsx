@@ -8,6 +8,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
 import { theme } from 'theme';
+import Icons from "Icons";
 
 const RecoilInit = () => {
   useInitAddress();
@@ -24,12 +25,16 @@ export function Main() {
       <RecoilInit />
       <ThemeProvider theme={theme}>
         <CssBaseline/>
+        <Icons/>
         <AppBar position="static" sx={{
           borderWidth: '0px 0px 1px 0px',
           borderStyle: 'solid',
           borderColor: 'primary.dark'
         }}>
           <Toolbar>
+            <svg width="32" height="32">
+                <use href="#free-willy"/>
+            </svg>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
               Terra Toolbox
             </Typography>
