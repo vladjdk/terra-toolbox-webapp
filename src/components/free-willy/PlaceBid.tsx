@@ -1,8 +1,8 @@
 import { Button, Stack, Typography, TextField, Select, MenuItem, InputLabel } from '@mui/material';
-import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
+import { useConnectedWallet } from '@terra-money/wallet-provider';
 import { useAnchorLiquidationContract } from 'hooks/useAnchorLiquidationContract';
 import useNetwork from 'hooks/useNetwork';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TransactionDialog } from 'components/dialogs/TransactionDialog';
 
 enum Markets {
@@ -13,35 +13,20 @@ const MIN_PREMIUM = 1;
 const MAX_PREMIUM = 30;
 
 interface PlaceBidProps {
+    uusdBalance: number,
     onBidPlaced?: () => void
 }
 
 export default function PlaceBid(props: PlaceBidProps) {
-    const { onBidPlaced } = props;
+    const { uusdBalance, onBidPlaced } = props;
     const network = useNetwork();
-    const lcd = useLCDClient();
     const wallet = useConnectedWallet();
-    const [uusdBalance, setUusdBalance] = useState<number>(0);
     const [market, setMarket] = useState<Markets>(Markets.bluna);
     const [premium, setPremium] = useState<number>(1);
     const [bid, setBid] = useState<number>(0);
     const [transactionData, setTransactionData] = useState<any>();
     
     const { submitBid } = useAnchorLiquidationContract(network.contracts.anchorLiquidation);
-
-    useEffect(() => {
-        getBalance();
-    }, [wallet, network])
-
-    const getBalance = () => {
-        if (wallet) {
-            lcd.bank.balance(wallet.walletAddress).then(balance => {
-                const [coins,] = balance;
-                const uusdBalance = coins.get('uusd');
-                setUusdBalance(uusdBalance ? uusdBalance.amount.toNumber() : 0);
-            })
-        }
-    }
 
     const fromMicro = (value: number) => {
         return value / 1000000;
@@ -66,8 +51,10 @@ export default function PlaceBid(props: PlaceBidProps) {
     }
 
     const onPlaceBid = () => {
-        const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
-        setTransactionData(submitBid(toMicro(bid), collateralToken, premium))
+        if (canBid()) {
+            const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
+            setTransactionData(submitBid(toMicro(bid), collateralToken, premium));
+        }
     }
 
     const canBid = () => {
@@ -84,7 +71,6 @@ export default function PlaceBid(props: PlaceBidProps) {
     }
 
     const onBidSuccessful = () => {
-        getBalance();
         if (onBidPlaced) {
             onBidPlaced();
         }

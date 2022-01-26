@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, TextField, Divider, Grid } from '@mui/material';
+import { Button, Stack, Typography, Grid } from '@mui/material';
 import { useAnchorLiquidationContract, Bid } from 'hooks/useAnchorLiquidationContract';
 import useNetwork from 'hooks/useNetwork';
 import { useEffect, useState } from 'react';

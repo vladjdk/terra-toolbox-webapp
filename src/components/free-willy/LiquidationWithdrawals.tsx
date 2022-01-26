@@ -9,7 +9,6 @@ import {
     TxUnspecifiedError,
     UserDenied,
 } from "@terra-money/wallet-provider";
-import 'components/free-willy/liquidation-withdrawals.css';
 import useNetwork from "hooks/useNetwork";
 import { Button, Dialog, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from "@mui/material";
 
@@ -109,8 +108,7 @@ export default function LiquidationWithdrawals(props: LiquidationWithdrawalsProp
                         txError ?
                         <p>{txError}</p>
                         :
-                        <p>Loading</p> 
-                        //todo: loading anim
+                        <p>Loading</p>
                     }
                     </DialogContentText>
                     <Stack spacing={2} direction="row" sx={{justifyContent: 'center'}}>
