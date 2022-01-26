@@ -66,8 +66,10 @@ export default function PlaceBid(props: PlaceBidProps) {
     }
 
     const onPlaceBid = () => {
-        const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
-        setTransactionData(submitBid(toMicro(bid), collateralToken, premium))
+        if (canBid()) {
+            const collateralToken = (market === Markets.bluna) ? network.contracts.bluna : network.contracts.beth;
+            setTransactionData(submitBid(toMicro(bid), collateralToken, premium));
+        }
     }
 
     const canBid = () => {

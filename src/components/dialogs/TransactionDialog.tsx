@@ -19,7 +19,7 @@ enum TransactionState {
     signing, noSign, polling, success, fail, timeout
 }
 
-const MAX_POLLING_DURATION = 60 * 1000; // 1 minute
+const MAX_POLLING_DURATION = 300 * 1000; // 5 minutes
 const POLLING_INTERVAL = 3 * 1000; // 3 seconds
 
 export function TransactionDialog(props: TransactionDialogProps) {
@@ -30,11 +30,10 @@ export function TransactionDialog(props: TransactionDialogProps) {
 
     const {
         msgs,
-        fee = undefined,
         title = 'Waiting for Transaction',
         pollingMsg = 'Please wait...',
         successMsg = <p>Transaction successful!: <a href={link} target="_blank">[TX Info]</a></p>,
-        failureMsg = 'Transaction failure!',
+        failureMsg = <p>Transaction failure!: <a href={link} target="_blank">[TX Info]</a></p>,
         onSuccess,
         onFail,
         onClose
@@ -50,7 +49,6 @@ export function TransactionDialog(props: TransactionDialogProps) {
                     if (txInfo) {
                         if (txInfo.code === 0) {
                             setTransactionState(TransactionState.success);
-                            setLink(`https://finder.terra.money/${wallet?.network.chainID}/tx/${txInfo.txhash}`);
                             if (onSuccess) {
                                 onSuccess(txInfo);
                             }
@@ -60,6 +58,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
                                 onFail(txInfo);
                             }
                         }
+                        setLink(`https://finder.terra.money/${wallet?.network.chainID}/tx/${txInfo.txhash}`);
                     } else {
                         setTransactionState(TransactionState.timeout);
                     }
