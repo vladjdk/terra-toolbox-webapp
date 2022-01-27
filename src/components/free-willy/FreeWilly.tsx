@@ -7,6 +7,7 @@ import useNetwork from 'hooks/useNetwork';
 import { useAnchorLiquidationContract, BidPool, Bid } from 'hooks/useAnchorLiquidationContract';
 import { useEffect, useState } from 'react';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
+import LiquidationsByPrice from './LiquidationsByPrice';
 
 export function FreeWilly() {
     const network = useNetwork();
@@ -92,6 +93,11 @@ export function FreeWilly() {
                 <Grid item xs={12} sm={12}>
                     <Paper elevation={3}>
                         <LiquidationBidChart bethPools={bethPools} blunaPools={blunaPools}/>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Paper elevation={3}>
+                        <LiquidationsByPrice/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
