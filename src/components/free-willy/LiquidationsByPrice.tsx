@@ -17,10 +17,8 @@ const defaultData = {
     labels: [], 
     datasets: [ 
         {
-            label:"",
             data: [],
-            backgroundColor: 'rgba(255, 99, 132, 1.0)',
-            fill: true
+            backgroundColor: 'rgba(255, 99, 132, 1.0)'
         }
     ]
 }
