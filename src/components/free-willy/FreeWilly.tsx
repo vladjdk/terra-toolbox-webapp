@@ -7,6 +7,7 @@ import useNetwork from 'hooks/useNetwork';
 import { useAnchorLiquidationContract, BidPool, Bid } from 'hooks/useAnchorLiquidationContract';
 import { useEffect, useState } from 'react';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
+import LiquidationsByPrice from './LiquidationsByPrice';
 
 export function FreeWilly() {
     const network = useNetwork();
@@ -89,23 +90,28 @@ export function FreeWilly() {
     return (
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
             <Grid container spacing={2} >
-                <Grid item xs={12} sm={12}>
-                    <Paper elevation={3}>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3} style={{height: '100%'}}>
                         <LiquidationBidChart bethPools={bethPools} blunaPools={blunaPools}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Paper elevation={3}>
+                    <Paper elevation={3} style={{height: '100%'}}>
+                        <LiquidationsByPrice/>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3} style={{height: '100%'}}>
                         <PlaceBid uusdBalance={uusdBalance} onBidPlaced={onRefresh}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Paper elevation={3}>
+                    <Paper elevation={3} style={{height: '100%'}}>
                         <LiquidationWithdrawals bethClaim={bethClaim} blunaClaim={blunaClaim} onClaim={onRefresh}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
-                    <Paper elevation={3}>
+                    <Paper elevation={3} style={{height: '100%'}}>
                         <MyBids bethBids={bethBids} blunaBids={blunaBids} onBidUpdate={onRefresh}/>
                     </Paper>
                 </Grid>

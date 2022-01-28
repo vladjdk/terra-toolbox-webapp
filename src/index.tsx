@@ -11,7 +11,9 @@ import {
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    PointElement,
+    LineElement
 } from 'chart.js';
 
 ChartJS.register(
@@ -20,7 +22,9 @@ ChartJS.register(
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    PointElement,
+    LineElement
 );
 
 getChainOptions().then((chainOptions) => {

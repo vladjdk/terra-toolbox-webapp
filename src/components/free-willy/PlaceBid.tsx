@@ -84,7 +84,7 @@ export default function PlaceBid(props: PlaceBidProps) {
                 alignItems="center"
                 spacing={2}
             >
-                <Typography variant="h4" sx={{margin: '10px'}}>
+                <Typography variant="h5" sx={{margin: '10px'}}>
                     Place Bid
                 </Typography>
                 <Button variant="contained" onClick={() => setBid(uusdBalance / 1000000)}>{uusdBalance / 1000000} UST</Button>

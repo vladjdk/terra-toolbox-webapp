@@ -59,11 +59,12 @@ export default function LiquidationBidChart(props: LiquidationBidChartProps) {
     }, [bethPools, blunaPools]);
 
     return (
-        <Stack sx={{padding: '10px'}}>
-            <Typography variant="h4" sx={{margin: '10px'}}>
+        
+        <Stack direction='column' alignItems='flex-start' justifyContent='space-between' spacing={4} sx={{padding: '10px'}}>
+            <Typography variant="h5" sx={{margin: '10px'}}>
                 Liquidation Bids
             </Typography>
-            <Bar
+            <Bar 
                 options={options}
                 data={data}
             />
