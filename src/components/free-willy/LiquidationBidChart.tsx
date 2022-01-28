@@ -2,14 +2,31 @@ import { Typography, Stack } from "@mui/material";
 import { BidPool } from "hooks/useAnchorLiquidationContract";
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
+import { primaryTextColor } from 'theme';
 
 const options = {
     responsive: true,
     plugins: {
       legend: {
         position: 'top' as const,
-      }
+        labels: {
+            color: primaryTextColor
+        }
+      },
     },
+    scales: {
+        yAxes: {
+            ticks: {
+                color: primaryTextColor
+            },
+        },
+        xAxes: {
+            ticks: {
+                color: primaryTextColor
+            },
+        }
+    },
+    
 };
 
 const defaultData = {

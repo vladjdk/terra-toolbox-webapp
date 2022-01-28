@@ -1,12 +1,13 @@
 import { RecoilRoot } from "recoil";
 import { useInitAddress, useInitNetwork } from "data/init";
-import { AppBar, createTheme, Toolbar, Typography, ThemeProvider } from '@mui/material';
+import { AppBar, Toolbar, Typography, ThemeProvider } from '@mui/material';
 import CssBaseline from "@mui/material/CssBaseline";
 import { Home } from 'components/Home';
 import { FreeWilly } from 'components/free-willy/FreeWilly';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
+import { theme } from 'theme';
 import Icons from "Icons";
 
 const RecoilInit = () => {
@@ -18,26 +19,6 @@ const RecoilInit = () => {
 export function Main() {
   const navigate = useNavigate();
 
-  const theme = createTheme({
-    palette: {
-      primary: {
-        main: '#1c1c1c',
-        light: '#262627',
-        dark: '#000000'
-      },
-      secondary: {
-        main: '#2f81f4',
-      },
-      background: {
-        default: '#323233',
-        paper: '#434343',
-      },
-      text: {
-        primary: 'rgba(255,255,255,0.87)',
-        secondary: 'rgba(255,255,255,0.60)'
-      }
-    }
-  });
 
   return (
     <RecoilRoot>
