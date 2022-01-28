@@ -1,10 +1,11 @@
 import { Typography, Stack, Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
-import axios from 'axios';
-import { useAlphaDeFi } from "hooks/useAlphaDeFi";
+import { useAlphaDeFi, LiquidationByPrice } from "hooks/useAlphaDeFi";
 
 const options = {
+    type: 'line',
+    borderColor: 'rgb(132, 99, 255, 0.3)',
     responsive: true,
     plugins: {
         legend: {
@@ -26,9 +27,22 @@ const defaultData = {
 export default function LiquidationsByPrice() {
     const [data, setData] = useState<any>(defaultData);
     const { getLiquidationsByPrice, navigateToSite } = useAlphaDeFi(); 
-
+    const [topLiqPrice, setTopLiqPrice] = useState<number>(0);
     const formatPrice = (price: number) => {
         return `$${price.toFixed(2)}`;
+    }
+
+    const highestLiquidationAmount = (lbp: Array<LiquidationByPrice>) => {
+        var largestValue = 0;
+        var largestNum = 0;
+        lbp.forEach(value => {
+            const lv = value.Loan_Value
+            if(lv>largestValue) {
+                largestValue = lv;
+                largestNum = value.Luna_Liquidation_Price;
+            }
+        });
+        setTopLiqPrice(Math.round(largestNum * 100) / 100)
     }
 
     useEffect(() => {
@@ -45,7 +59,9 @@ export default function LiquidationsByPrice() {
                     }
                 ],
             })
+            highestLiquidationAmount(liquidationsByPrice);
         })
+        
     }, []);
 
     return (
@@ -56,11 +72,14 @@ export default function LiquidationsByPrice() {
                 alignItems="center"
                 spacing={2}
             >
-                <Typography variant="h4" sx={{margin: '10px'}}>
+                <Typography variant="h5" sx={{margin: '5px'}}>
                     Liquidations by Price
                 </Typography>
                 <Button variant="outlined" onClick={navigateToSite}>Powered by Alpha DeFi</Button>
             </Stack>
+            <Typography variant="h6" sx={{margin: '5px'}}>
+                    Highest Liquidation Wall: ${topLiqPrice}
+            </Typography>
             <Line
                 options={options}
                 data={data}

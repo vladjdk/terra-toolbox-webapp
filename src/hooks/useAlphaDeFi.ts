@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = 'https://api.alphadefi.fund';
 const WEBSITE_URL = 'https://app.alphadefi.fund/dashboard';
 
-interface LiquidationByPrice {
+export interface LiquidationByPrice {
     Date: string
     Loan_Value: number
     Luna_Liquidation_Price: number

@@ -148,7 +148,7 @@ export default function MyBids(props: MyBidsProps) {
         <Stack sx={{padding: '10px'}}>
             <Grid container alignItems="center">
                 <Grid item md={8} xs={6}>
-                    <Typography variant="h4" sx={{margin: '10px'}}>
+                    <Typography variant="h5" sx={{margin: '10px'}}>
                             My Bids
                     </Typography>
                 </Grid>

@@ -79,7 +79,7 @@ export default function LiquidationWithdrawals(props: LiquidationWithdrawalsProp
             return (
                 <>
                 <Stack padding="10px">
-                <Typography variant="h4" sx={{margin: '10px'}}>
+                <Typography variant="h5" sx={{margin: '10px'}}>
                     Withdraw Liquidations
                 </Typography>
                 <Typography variant="h6">{collaterals?.bluna} bLuna</Typography>
