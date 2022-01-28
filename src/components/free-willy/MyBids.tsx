@@ -81,7 +81,7 @@ export default function MyBids(props: MyBidsProps) {
                 amount: `${parseInt(bid.amount) / 1000000} UST`,
                 premium_slot: `${bid.premium_slot.toString()}%`,
                 collateral_token: collateralName,
-                bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end) ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end)*1000 - timestamp) / 1000/60), 2} minutes until activation`
+                bid_status: bid.wait_end === null ? "Active" : timestamp > parseInt(bid.wait_end) ? "Ready for activation" : `${ Math.round((parseInt(bid.wait_end) - timestamp))} seconds until activation`
             } as BidRow;
         }))
     }, [bethBids, blunaBids, network, transactionData, timestamp])

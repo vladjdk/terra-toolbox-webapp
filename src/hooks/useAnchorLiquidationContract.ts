@@ -136,7 +136,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
     // TODO: Queries for bids are limited to `limit`.
     //       Users with more than the `limit` may require an additional query.
     function getBidsByUser(collateralTokenContract: string, startAfter = '0', limit = 31): Promise<GetBidsByUserResponse> {
-        console.log(userWalletAddr)
         return _query<GetBidsByUserResponse>({
             bids_by_user: {
                 collateral_token: collateralTokenContract,
