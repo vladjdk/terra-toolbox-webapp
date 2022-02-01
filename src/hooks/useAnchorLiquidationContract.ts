@@ -120,7 +120,6 @@ export const useAnchorLiquidationContract = (contractAddress: AccAddress) => {
       
         return post({
             msgs: [executeMsg],
-            fee: new Fee(fee.gas, { uusd: fee.amount }),
         });
     }
 
