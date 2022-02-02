@@ -16,6 +16,7 @@ type NativeWalletState = {
 }
 
 type RewardState = {
+    tinyReward: number,
     totalRewards: any[]
 }
 
@@ -39,6 +40,7 @@ const TinyAngel = (): JSX.Element => {
 
     const [rewardState, setRewardState]
     = useSetState<RewardState>({
+        tinyReward: 0.000001,
         totalRewards: [],
     })
 
@@ -62,11 +64,6 @@ const TinyAngel = (): JSX.Element => {
             const { data: swaprates } = await axios.get(ustSwapRateQuery);
             const swapMap = swaprates.reduce((map: any, obj: any) => { map.set(obj.denom, obj.swaprate); return map; }, new Map);
             setUstSwapRateMap(swapMap);
-
-            /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
-            const { total: totalRewards } = await LCD.distribution.rewards(user_address)
-            const relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(0.000001) )
-            setRewardState({ totalRewards: relevantRewards })
         })();
     })
 
@@ -80,8 +77,21 @@ const TinyAngel = (): JSX.Element => {
             setNativeWalletState({ tinyBalances });
         }, 200)
         
-        return () => clearTimeout(getTinyBalances)
+        return () => clearTimeout(getTinyBalances);
     }, [ user_address, nativeWalletState.tinyValue, ustSwapRateMap ]);
+
+    useEffect(() => {
+        if ( !user_address ) return;
+
+        const getTotalRewards = setTimeout(async() => {
+            /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
+            const { total: totalRewards } = await LCD.distribution.rewards(user_address)
+            const relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(rewardState.tinyReward) )
+            setRewardState({ totalRewards: relevantRewards })
+        });
+
+        return () => clearTimeout(getTotalRewards);
+    }, [ user_address, rewardState.tinyReward ])
 
     return (
         <>
@@ -112,7 +122,7 @@ const TinyAngel = (): JSX.Element => {
                             </Stack>
 
                             { nativeWalletState.tinyBalances.length === 0 &&
-                                <Typography>You don't have any tiny balances</Typography>
+                                <Typography>No Tiny Balances</Typography>
                             }
 
                             {nativeWalletState.tinyBalances.length > 0 && 
@@ -148,19 +158,19 @@ const TinyAngel = (): JSX.Element => {
                             <Stack
                             padding="15px 0">
                                 <Typography>
-                                    Tiny Balance Upper Limit (in UST)
+                                    Tiny Reward Lower Limit (in UST)
                                 </Typography>
                                 <Slider 
-                                onChange={(e: any) => setNativeWalletState({ tinyValue: +e.target.value })}
+                                onChange={(e: any) => setRewardState({ tinyReward: +e.target.value })}
                                 color="primary"
-                                min={0.5} 
-                                max={5}
-                                step={0.1}
+                                min={0.000001} 
+                                max={1}
+                                step={0.000001}
                                 valueLabelDisplay="auto"/>
                             </Stack>
 
                             { rewardState.totalRewards.length === 0 &&
-                                <Typography>You don't have any staking rewards</Typography>
+                                <Typography>No Staking Rewards</Typography>
                             }
 
                             {rewardState.totalRewards.length > 0 && 
