@@ -127,7 +127,7 @@ const TinyAngel = (): JSX.Element => {
             </Grid>
         </Container>
         { nativeWalletState.msgs.length !== 0 && 
-            <TransactionDialog title="Sending Assets to Angel..." msgs={nativeWalletState.msgs} onSuccess={() => null} onClose={() => setNativeWalletState({ msgs: [] })}/>
+            <TransactionDialog title="Sending Assets to Angel..." msgs={nativeWalletState.msgs} onSuccess={() => setNativeWalletState({ tinyBalances: [] })} onClose={() => setNativeWalletState({ msgs: [] })}/>
         }
         </>
     )
