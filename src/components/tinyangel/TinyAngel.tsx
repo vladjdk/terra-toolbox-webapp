@@ -5,23 +5,24 @@ import { TransactionDialog } from "components/dialogs/TransactionDialog"
 import { useEffect, useState } from "react"
 import { useLCDClient } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
-import { donateTinyBalances } from "./msgs";
+import { claimReward, donateTinyAmount } from "./msgs";
 import { ANGEL_PROTO_ADDRESS_BOMBAY, visualDenomName } from "../../constants";
 import { useEffectOnce, useSetState } from "react-use";
 
 type NativeWalletState = {
     tinyBalances: any[],
     tinyValue: number,
-    msgs: MsgSend[] | MsgExecuteContract[],
 }
 
 type RewardState = {
+    validatorAddresses: string[],
     tinyReward: number,
     totalRewards: any[]
 }
 
 const toTerraAmount = (uamount: number | string): number => + uamount / 1000000
 const toChainAmount = (uamount: number | string): number => + uamount * 1000000
+
 const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
 
 const TinyAngel = (): JSX.Element => {
@@ -30,19 +31,46 @@ const TinyAngel = (): JSX.Element => {
     const user_address = useAddress()
 
     const [ustSwapRateMap, setUstSwapRateMap] = useState<any>(undefined)
+    const [msgs, setMsgs] = useState<MsgSend[] | MsgExecuteContract[]>([])
     
     const [nativeWalletState, setNativeWalletState] 
     = useSetState<NativeWalletState>({
         tinyBalances: [],
         tinyValue: 0.5,
-        msgs: [],
     })
 
     const [rewardState, setRewardState]
     = useSetState<RewardState>({
+        validatorAddresses: [],
         tinyReward: 0.000001,
         totalRewards: [],
     })
+
+    const tinyBalanceSetter = async () => {
+        const [coins] = await LCD.bank.balance(user_address);
+        const tinyBalances = coins.toData().filter(e => Number( e.amount ) / ustSwapRateMap.get(e.denom) < toChainAmount(nativeWalletState.tinyValue));
+
+        setNativeWalletState({ tinyBalances });
+    }
+
+    const rewardStateSetter = async () => {
+        /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
+        const { total: totalRewards } = await LCD.distribution.rewards(user_address)
+        let relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(0.000001) && Number(reward.amount) < toChainAmount(rewardState.tinyReward) )
+        relevantRewards = relevantRewards.map((el: any) => {
+            return {
+                ...el,
+                amount: parseInt(el.amount)
+            }
+        })
+
+        setRewardState({ totalRewards: relevantRewards })
+    }
+
+    const refetchUserState = () => {
+        tinyBalanceSetter()
+        rewardStateSetter()
+    }
 
     const onDonate = async () => {
         if ( nativeWalletState.tinyBalances.length === 0 ) {
@@ -54,8 +82,23 @@ const TinyAngel = (): JSX.Element => {
             return Object.assign(obj, { [el.denom]: el.amount })
         }, {})
 
-        const msgs = donateTinyBalances(user_address, ANGEL_PROTO_ADDRESS_BOMBAY, balancesObj)
-        setNativeWalletState({ msgs });
+        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_BOMBAY, balancesObj)
+        setMsgs(msgs);
+    }
+
+    const onRewardDonate = () => {
+        const msgs: any[] = claimReward(user_address, rewardState.validatorAddresses)
+
+        if ( rewardState.totalRewards.length !== 0 ) {
+            const tinyRewardsObj = rewardState.totalRewards.reduce((obj, el) => {
+                return Object.assign(obj, { [el.denom]: el.amount })
+            }, {})
+
+            const [ sendRewardsToAngelMsg ] = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_BOMBAY, tinyRewardsObj);
+            msgs.push(sendRewardsToAngelMsg);
+        }
+
+        setMsgs(msgs)
     }
 
     useEffectOnce(() => {
@@ -64,32 +107,24 @@ const TinyAngel = (): JSX.Element => {
             const { data: swaprates } = await axios.get(ustSwapRateQuery);
             const swapMap = swaprates.reduce((map: any, obj: any) => { map.set(obj.denom, obj.swaprate); return map; }, new Map);
             setUstSwapRateMap(swapMap);
+
+            const [delegations] = await LCD.staking.delegations(user_address)
+            const validatorAddresses = delegations.map(e => e.validator_address);
+            setRewardState({ validatorAddresses })
         })();
     })
 
     useEffect(() => {
         if ( !user_address || ustSwapRateMap === undefined ) return;
 
-        const getTinyBalances = setTimeout(async () => {
-            const [coins] = await LCD.bank.balance(user_address);
-            const tinyBalances = coins.toData().filter(e => Number( e.amount ) / ustSwapRateMap.get(e.denom) < toChainAmount(nativeWalletState.tinyValue));
-
-            setNativeWalletState({ tinyBalances });
-        }, 200)
-        
+        const getTinyBalances = setTimeout(tinyBalanceSetter, 200)
         return () => clearTimeout(getTinyBalances);
     }, [ user_address, nativeWalletState.tinyValue, ustSwapRateMap ]);
 
     useEffect(() => {
         if ( !user_address ) return;
 
-        const getTotalRewards = setTimeout(async() => {
-            /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
-            const { total: totalRewards } = await LCD.distribution.rewards(user_address)
-            const relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(0.000001) && Number(reward.amount) < toChainAmount(rewardState.tinyReward) )
-            setRewardState({ totalRewards: relevantRewards })
-        });
-
+        const getTotalRewards = setTimeout(rewardStateSetter, 200);
         return () => clearTimeout(getTotalRewards);
     }, [ user_address, rewardState.tinyReward ])
 
@@ -98,7 +133,7 @@ const TinyAngel = (): JSX.Element => {
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <Paper elevation={3} style={{height: '100%'}}>
+                    <Paper elevation={3} style={{height: 'fit-content'}}>
                         <Stack spacing={1} sx={{padding: '30px'}}>
                             <Typography 
                             variant="h5" 
@@ -193,14 +228,14 @@ const TinyAngel = (): JSX.Element => {
                                     ))}
                                 </Grid>
                             }
-                            <Button variant="contained" onClick={ onDonate }>Donate</Button>
+                            <Button variant="contained" onClick={ onRewardDonate }>Withdraw Rewards and Donate</Button>
                         </Stack>
                     </Paper>
                 </Grid>
             </Grid>
         </Container>
-        { nativeWalletState.msgs.length !== 0 && 
-            <TransactionDialog title="Sending Assets to Angel..." msgs={nativeWalletState.msgs} onSuccess={() => setNativeWalletState({ tinyBalances: [] })} onClose={() => setNativeWalletState({ msgs: [] })}/>
+        { msgs.length !== 0 && 
+            <TransactionDialog title="Donating..." msgs={msgs} onSuccess={ refetchUserState } onClose={() => setMsgs([])}/>
         }
         </>
     )

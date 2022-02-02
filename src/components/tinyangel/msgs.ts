@@ -1,10 +1,19 @@
-import { MsgSend } from "@terra-money/terra.js";
+import { MsgSend, MsgWithdrawDelegatorReward } from "@terra-money/terra.js";
 
-export const donateTinyBalances = (sender: string, receiver: string, balances: any ): MsgSend[] => {
+export const donateTinyAmount = (sender: string, receiver: string, balances: any ): MsgSend[] => {
 
     return [new MsgSend(
         sender,
         receiver,
         balances,
     )]
+}
+
+export const claimReward = (delegator: string, validators: string[]): MsgWithdrawDelegatorReward[] => {
+
+    return validators.map(validator_address => 
+        new MsgWithdrawDelegatorReward(
+        delegator,
+        validator_address
+    ))
 }
