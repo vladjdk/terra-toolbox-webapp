@@ -6,6 +6,7 @@ import { useLCDClient } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
 import { tinyThreshold } from "./tinyThreshold";
 import { donateTinyBalances } from "./msgs";
+import { ANGEL_PROTO_ADDRESS_BOMBAY } from "../../constants";
 
 const tempStyle = {
     display: 'grid',
@@ -30,7 +31,7 @@ const TinyAngel = (): JSX.Element => {
             return Object.assign(obj, { [el.denom]: el.amount })
         }, {})
 
-        const msgs = donateTinyBalances(user_address, "terra15c03nmgaadrdy4tpy03fekgtd4psg0d0yac6mj", balancesObj)
+        const msgs = donateTinyBalances(user_address, ANGEL_PROTO_ADDRESS_BOMBAY, balancesObj)
         setMsgs(msgs);
     }
 
