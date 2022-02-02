@@ -24,7 +24,7 @@ const TinyAngel = (): JSX.Element => {
     const LCD = useLCDClient()
     const user_address = useAddress()
 
-    const [ustSwapRateMap, setUstSwapRateMap] = useState<Map<string, number> | any>(undefined)
+    const [ustSwapRateMap, setUstSwapRateMap] = useState<any>(undefined)
     const [nativeWalletState, setNativeWalletState] 
     = useSetState<NativeWalletState>({
         tinyBalances: [],
