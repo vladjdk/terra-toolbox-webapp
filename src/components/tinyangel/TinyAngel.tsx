@@ -43,7 +43,7 @@ const TinyAngel = (): JSX.Element => {
             const _coins = coins.toData().filter(e => Number( e.amount ) < tinyThreshold);
             setTinyBalances(_coins);
         })();
-    }, []);
+    }, [ user_address ]);
 
     return (
         <>
@@ -56,8 +56,9 @@ const TinyAngel = (): JSX.Element => {
                                 <Stack
                                     direction="row"
                                     justifyContent="space-between"
+                                    padding="0px 15px"
                                     alignItems="center"
-                                    spacing={2}
+                                    spacing={5}
                                 >
                                     <Typography variant="h5" sx={{margin: '10px'}}>
                                         {balance.denom}
