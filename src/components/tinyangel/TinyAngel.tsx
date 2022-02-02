@@ -1,12 +1,12 @@
 import { MsgExecuteContract, MsgSend } from "@terra-money/terra.js"
 import { TransactionDialog } from "components/dialogs/TransactionDialog"
-import useNetwork from "hooks/useNetwork"
 import { useEffect, useState } from "react"
 import { useLCDClient } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
 import { tinyThreshold } from "./tinyThreshold";
 import { donateTinyBalances } from "./msgs";
 import { ANGEL_PROTO_ADDRESS_BOMBAY } from "../../constants";
+import { Container, Grid, Paper, Stack, Typography, Button } from "@mui/material";
 
 const tempStyle = {
     display: 'grid',
@@ -46,14 +46,42 @@ const TinyAngel = (): JSX.Element => {
     }, []);
 
     return (
-        <section style={tempStyle}>
-            <button onClick={onDonate}>
-                Donate Tiny Balances
-            </button>
-            { Boolean(msgs.length) && 
-                <TransactionDialog title="Donate to Angel" msgs={msgs} onSuccess={() => null} onClose={() => setMsgs([])}/>
-            }
-        </section>
+        <>
+        <Container sx={{maxWidth: '1200px', padding: '10px'}}>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3} style={{height: '100%'}}>
+                        <Stack spacing={1} sx={{padding: '10px'}}>
+                            {tinyBalances.map(balance => (
+                                <Stack
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    spacing={2}
+                                >
+                                    <Typography variant="h5" sx={{margin: '10px'}}>
+                                        {balance.denom}
+                                    </Typography>
+                                    <Typography variant="h5" sx={{margin: '10px'}}>
+                                        {balance.amount}
+                                    </Typography>
+                                </Stack>
+                            ))}
+                        </Stack>
+                        <Button variant="contained" onClick={ onDonate }>Donate all tiny balances to angel</Button>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Paper elevation={3} style={{height: '100%'}}>
+                        <div>Hello</div>
+                    </Paper>
+                </Grid>
+            </Grid>
+        </Container>
+        { msgs.length !== 0 && 
+            <TransactionDialog title="Sending Assets to Angel..." msgs={msgs} onSuccess={() => null} onClose={() => setMsgs([])}/>
+        }
+        </>
     )
 }
 
