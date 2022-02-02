@@ -126,21 +126,23 @@ const TinyAngel = (): JSX.Element => {
                             }
 
                             {nativeWalletState.tinyBalances.length > 0 && 
-                            nativeWalletState.tinyBalances.map(balance => (
-                                <Stack
-                                    direction="row"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    spacing={5}
-                                >
-                                    <Typography variant="h6" sx={{margin: '10px'}}>
-                                        {visualDenomName.get(balance.denom)}
-                                    </Typography>
-                                    <Typography variant="h6" sx={{margin: '10px'}}>
-                                        {toTerraAmount(balance.amount)}
-                                    </Typography>
-                                </Stack>
-                            ))}
+                                <Grid 
+                                container 
+                                gap="10px">
+                                    {nativeWalletState.tinyBalances.map(balance => (
+                                        <Grid
+                                        border="1px solid white"
+                                        borderRadius="10px">
+                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                                {visualDenomName.get(balance.denom)}
+                                            </Typography>
+                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                                {toTerraAmount(balance.amount).toFixed(6)}
+                                            </Typography>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            }
                             <Button variant="contained" onClick={ onDonate }>Donate</Button>
                         </Stack>
                     </Paper>
@@ -174,21 +176,23 @@ const TinyAngel = (): JSX.Element => {
                             }
 
                             {rewardState.totalRewards.length > 0 && 
-                            rewardState.totalRewards.map(reward => (
-                                <Stack
-                                    direction="row"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    spacing={5}
-                                >
-                                    <Typography variant="h6" sx={{margin: '10px'}}>
-                                        {visualDenomName.get(reward.denom)}
-                                    </Typography>
-                                    <Typography variant="h6" sx={{margin: '10px'}}>
-                                        {toTerraAmount(reward.amount).toFixed(6)}
-                                    </Typography>
-                                </Stack>
-                            ))}
+                                <Grid 
+                                container 
+                                gap="10px">
+                                    {rewardState.totalRewards.map(reward => (
+                                        <Grid
+                                        border="1px solid white"
+                                        borderRadius="10px">
+                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                                {visualDenomName.get(reward.denom)}
+                                            </Typography>
+                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                                {toTerraAmount(reward.amount).toFixed(6)}
+                                            </Typography>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            }
                             <Button variant="contained" onClick={ onDonate }>Donate</Button>
                         </Stack>
                     </Paper>
