@@ -5,14 +5,10 @@ import { useLCDClient } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
 import { tinyThreshold } from "./tinyThreshold";
 import { donateTinyBalances } from "./msgs";
-import { ANGEL_PROTO_ADDRESS_BOMBAY } from "../../constants";
+import { ANGEL_PROTO_ADDRESS_BOMBAY, visualDenomName } from "../../constants";
 import { Container, Grid, Paper, Stack, Typography, Button } from "@mui/material";
 
-const tempStyle = {
-    display: 'grid',
-    placeItems: 'center',
-    height: 'calc(100vh - 65px)'
-}
+const toTerraAmount = (uamount: number | string): number => + uamount / 1000000
 
 const TinyAngel = (): JSX.Element => {
 
@@ -61,10 +57,10 @@ const TinyAngel = (): JSX.Element => {
                                     spacing={5}
                                 >
                                     <Typography variant="h5" sx={{margin: '10px'}}>
-                                        {balance.denom}
+                                        {visualDenomName.get(balance.denom)}
                                     </Typography>
                                     <Typography variant="h5" sx={{margin: '10px'}}>
-                                        {balance.amount}
+                                        {toTerraAmount(balance.amount)}
                                     </Typography>
                                 </Stack>
                             ))}
