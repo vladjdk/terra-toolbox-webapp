@@ -86,7 +86,7 @@ const TinyAngel = (): JSX.Element => {
         const getTotalRewards = setTimeout(async() => {
             /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
             const { total: totalRewards } = await LCD.distribution.rewards(user_address)
-            const relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(rewardState.tinyReward) )
+            const relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(0.000001) && Number(reward.amount) < toChainAmount(rewardState.tinyReward) )
             setRewardState({ totalRewards: relevantRewards })
         });
 
@@ -158,7 +158,7 @@ const TinyAngel = (): JSX.Element => {
                             <Stack
                             padding="15px 0">
                                 <Typography>
-                                    Tiny Reward Lower Limit (in UST)
+                                    Tiny Reward Upper Limit (in UST)
                                 </Typography>
                                 <Slider 
                                 onChange={(e: any) => setRewardState({ tinyReward: +e.target.value })}
