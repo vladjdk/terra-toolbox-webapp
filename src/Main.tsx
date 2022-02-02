@@ -4,6 +4,7 @@ import { AppBar, Toolbar, Typography, ThemeProvider } from '@mui/material';
 import CssBaseline from "@mui/material/CssBaseline";
 import { Home } from 'components/Home';
 import { FreeWilly } from 'components/free-willy/FreeWilly';
+import TinyAngel from "components/tinyangel/TinyAngel";
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
@@ -44,6 +45,7 @@ export function Main() {
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="freewilly" element={<FreeWilly/>} />
+          <Route path="tinyangel" element={<TinyAngel/>} />
           <Route path="*" element={<Navigate replace to="/"/>}/>
         </Routes>
       </ThemeProvider>
