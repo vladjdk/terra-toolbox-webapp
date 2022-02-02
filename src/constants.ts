@@ -24,3 +24,6 @@ export const COLLATERAL_RATIO = { DANGER: 0.15, WARNING: 0.3 };
 /* network:settings */
 export const PRICES_POLLING_INTERVAL = 30000;
 export const TX_POLLING_INTERVAL = 1000;
+
+/* terra:addresses */
+export const ANGEL_PROTO_ADDRESS_BOMBAY = "terra13au3ag9df7khs2sv7m485e5c5vfwwftlrzf7cw"
