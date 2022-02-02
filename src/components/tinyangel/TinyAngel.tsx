@@ -84,7 +84,7 @@ const TinyAngel = (): JSX.Element => {
                             <Stack
                             padding="15px 0">
                                 <Typography>
-                                    Tiny Balance Threshold (in UST)
+                                    Tiny Balance Upper Limit (in UST)
                                 </Typography>
                                 <Slider 
                                 onChange={(e: any) => setNativeWalletState({ tinyValue: +e.target.value })}
@@ -120,7 +120,7 @@ const TinyAngel = (): JSX.Element => {
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Paper elevation={3} style={{height: '100%'}}>
+                    <Paper elevation={3} style={{height: 'fit-content'}}>
                         <div>Upcoming</div>
                     </Paper>
                 </Grid>
