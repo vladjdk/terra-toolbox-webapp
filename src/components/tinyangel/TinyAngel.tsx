@@ -132,7 +132,7 @@ const TinyAngel = (): JSX.Element => {
         ;(async () => {
             /* UST Swaprate to calculate all denominations into appropriate unified tiny amount limit */
             const { data: swaprates } = await axios.get(ustSwapRateQuery);
-            const swapMap = swaprates.reduce((map: any, obj: any) => { map.set(obj.denom, obj.swaprate); return map; }, new Map);
+            const swapMap = swaprates.reduce((map: any, obj: any) => { map.set(obj.denom, obj.swaprate); return map; }, new Map([["uusd", 1]]));
             setUstSwapRateMap(swapMap);
 
             /* fetch and store all validator addresses user has staked to */
