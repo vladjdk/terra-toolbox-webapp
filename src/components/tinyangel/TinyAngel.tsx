@@ -44,9 +44,10 @@ const TinyAngel = (): JSX.Element => {
     const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom)
 
     //for slider
-    const valueText = (value: number) => {
-        return `${value} UST`;
-      }
+    const valueText = (value: number) => `${value} UST`;
+
+    //calculate sum of total donatables
+    const sumOf = (donatables: any[]): string => toTerraAmount(donatables.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)
 
     //function to update native tokens to donate on slider change
     const tinyBalanceSetter = async () => {
@@ -94,7 +95,6 @@ const TinyAngel = (): JSX.Element => {
     /* postable msgs populator */
     const onDonate = async () => {
         if ( nativeWalletState.tinyBalances.length === 0 ) {
-            alert("You don't have any tiny balances to donate");
             return;
         }
 
@@ -108,7 +108,6 @@ const TinyAngel = (): JSX.Element => {
 
     const onRewardDonate = () => {
         if( rewardState.validatorAddresses.length === 0 ) {
-            alert("You don't have any rewards to withdraw");
             return;
         }
 
@@ -242,7 +241,7 @@ const TinyAngel = (): JSX.Element => {
                             <br/>
                             <Typography sx={{ fontSize: '15px' }}>
                                 Total Donation Amount: &nbsp;
-                                {toTerraAmount(nativeWalletState.tinyBalances.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
+                                {sumOf(nativeWalletState.tinyBalances)}
                                 &nbsp;UST
                             </Typography>
 
@@ -330,7 +329,7 @@ const TinyAngel = (): JSX.Element => {
                             <br/>
                             <Typography sx={{ fontSize: '15px' }}>
                                 Total Donation Amount: &nbsp;
-                                {toTerraAmount(rewardState.totalRewards.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
+                                {sumOf(rewardState.totalRewards)}
                                 &nbsp;UST
                             </Typography>
 
