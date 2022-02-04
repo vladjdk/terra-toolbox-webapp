@@ -186,7 +186,11 @@ const TinyAngel = (): JSX.Element => {
 
                             { nativeWalletState.tinyBalances.length === 0 &&
                                 <Paper elevation={0}
-                                style={{ backgroundColor: 'grey', height: '100px', display: 'grid', placeItems: 'center' }}>
+                                style={{ 
+                                    backgroundColor: 'grey', height: '100px', 
+                                    display: 'grid', placeItems: 'center',
+                                    opacity: '0.5'
+                                }}>
                                     No Tiny Balances
                                 </Paper>
                             }
@@ -272,7 +276,11 @@ const TinyAngel = (): JSX.Element => {
 
                             { rewardState.totalRewards.length === 0 &&
                                 <Paper elevation={0}
-                                style={{ backgroundColor: 'grey', height: '100px', display: 'grid', placeItems: 'center' }}>
+                                style={{ 
+                                    backgroundColor: 'grey', height: '100px', 
+                                    display: 'grid', placeItems: 'center',
+                                    opacity: '0.5'
+                                }}>
                                     No Staking Rewards
                                 </Paper>
                             }
