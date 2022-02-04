@@ -3,7 +3,7 @@ import { Container, Grid, Paper, Stack, Typography, Button, Slider } from "@mui/
 import { MsgWithdrawDelegatorReward, MsgSend } from "@terra-money/terra.js"
 import { TransactionDialog } from "components/dialogs/TransactionDialog"
 import { useEffect, useState } from "react"
-import { useLCDClient } from "@terra-money/wallet-provider";
+import { useLCDClient, useWallet } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
 import { claimReward, donateTinyAmount } from "./msgs";
 import { ANGEL_PROTO_ADDRESS_BOMBAY, visualDenomName } from "../../constants";
@@ -20,8 +20,9 @@ const TinyAngel = (): JSX.Element => {
     const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
     const lowerlimit = 0.01 //below this amount in UST will not be donatable
 
-    const LCD = useLCDClient()
-    const user_address = useAddress()
+    const LCD = useLCDClient();
+    const user_address = useAddress();
+    const { status } = useWallet();
 
     const [ustSwapRateMap, setUstSwapRateMap] = useState<any>(undefined)
     const [msgs, setMsgs] = useState<(MsgSend | MsgWithdrawDelegatorReward)[]>([])
@@ -49,6 +50,11 @@ const TinyAngel = (): JSX.Element => {
 
     //function to update native tokens to donate on slider change
     const tinyBalanceSetter = async () => {
+        if ( !user_address ) {
+            setNativeWalletState({ tinyBalances: [] });
+            return;
+        }
+
         const [coins] = await LCD.bank.balance(user_address);
         const tinyBalances = coins.toData()
         .filter(coin => ustValue(coin) >= toChainAmount(lowerlimit) 
@@ -59,6 +65,11 @@ const TinyAngel = (): JSX.Element => {
 
     //function to update available rewards to donate on slider change
     const rewardStateSetter = async () => {
+        if ( !user_address ) {
+            setRewardState({ totalRewards: [] });
+            return;
+        }
+
         const { total: totalRewards } = await LCD.distribution.rewards(user_address)
         let relevantRewards = totalRewards.toData()
         .filter(reward => ustValue(reward) >= toChainAmount(lowerlimit) 
@@ -147,6 +158,8 @@ const TinyAngel = (): JSX.Element => {
         const getTotalRewards = setTimeout(rewardStateSetter, 200);
         return () => clearTimeout(getTotalRewards);
     }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses ])
+
+    useEffect( refetchUserState , [ status ])
 
     return (
         <>
