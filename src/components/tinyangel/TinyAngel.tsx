@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Container, Grid, Paper, Stack, Typography, Button, Slider } from "@mui/material";
-import { MsgExecuteContract, MsgSend } from "@terra-money/terra.js"
+import { MsgWithdrawDelegatorReward, MsgSend } from "@terra-money/terra.js"
 import { TransactionDialog } from "components/dialogs/TransactionDialog"
 import { useEffect, useState } from "react"
 import { useLCDClient } from "@terra-money/wallet-provider";
@@ -20,43 +20,51 @@ type RewardState = {
     totalRewards: any[]
 }
 
-const toTerraAmount = (uamount: number | string): number => + uamount / 1000000
-const toChainAmount = (uamount: number | string): number => + uamount * 1000000
+const toTerraAmount = (amount: number | string): number => + amount / 1000000
+const toChainAmount = (amount: number | string): number => + amount * 1000000
 
 const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
 
 const TinyAngel = (): JSX.Element => {
+    const marks = [{ value: 0.5, label: "0.5 UST" }, { value: 5, label: "5 UST" }]
 
     const LCD = useLCDClient()
     const user_address = useAddress()
 
     const [ustSwapRateMap, setUstSwapRateMap] = useState<any>(undefined)
-    const [msgs, setMsgs] = useState<MsgSend[] | MsgExecuteContract[]>([])
-    
+    const [msgs, setMsgs] = useState<(MsgSend | MsgWithdrawDelegatorReward)[]>([])
+
     const [nativeWalletState, setNativeWalletState] 
     = useSetState<NativeWalletState>({
         tinyBalances: [],
-        tinyValue: 0.5,
+        tinyValue: 2.5,
     })
 
     const [rewardState, setRewardState]
     = useSetState<RewardState>({
         validatorAddresses: [],
-        tinyReward: 0.000001,
+        tinyReward: 2.5,
         totalRewards: [],
     })
 
+    const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom)
+
     const tinyBalanceSetter = async () => {
         const [coins] = await LCD.bank.balance(user_address);
-        const tinyBalances = coins.toData().filter(e => Number( e.amount ) / ustSwapRateMap.get(e.denom) < toChainAmount(nativeWalletState.tinyValue));
+        const tinyBalances = coins.toData()
+        .filter(coin => ustValue(coin) >= toChainAmount(0.5) 
+        && ustValue(coin) < toChainAmount(nativeWalletState.tinyValue));
 
         setNativeWalletState({ tinyBalances });
     }
 
     const rewardStateSetter = async () => {
-        /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.000001 in count */
+        /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.5 in count */
         const { total: totalRewards } = await LCD.distribution.rewards(user_address)
-        let relevantRewards = totalRewards.toData().filter(reward => Number( reward.amount ) >= toChainAmount(0.000001) && Number(reward.amount) < toChainAmount(rewardState.tinyReward) )
+        let relevantRewards = totalRewards.toData()
+        .filter(reward => ustValue(reward) >= toChainAmount(0.5) 
+        && ustValue(reward) < toChainAmount(rewardState.tinyReward) )
+
         relevantRewards = relevantRewards.map((el: any) => {
             return {
                 ...el,
@@ -74,7 +82,7 @@ const TinyAngel = (): JSX.Element => {
 
     const onDonate = async () => {
         if ( nativeWalletState.tinyBalances.length === 0 ) {
-            alert("You don't have any tiny balances to donate")
+            alert("You don't have any tiny balances to donate");
             return;
         }
 
@@ -87,7 +95,13 @@ const TinyAngel = (): JSX.Element => {
     }
 
     const onRewardDonate = () => {
-        const msgs: any[] = claimReward(user_address, rewardState.validatorAddresses)
+        if( rewardState.validatorAddresses.length === 0 ) {
+            alert("You don't have any rewards to withdraw");
+            return;
+        }
+
+        const msgs: (MsgSend | MsgWithdrawDelegatorReward)[] 
+        = claimReward(user_address, rewardState.validatorAddresses)
 
         if ( rewardState.totalRewards.length !== 0 ) {
             const tinyRewardsObj = rewardState.totalRewards.reduce((obj, el) => {
@@ -126,7 +140,7 @@ const TinyAngel = (): JSX.Element => {
 
         const getTotalRewards = setTimeout(rewardStateSetter, 200);
         return () => clearTimeout(getTotalRewards);
-    }, [ user_address, rewardState.tinyReward ])
+    }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses ])
 
     return (
         <>
@@ -142,18 +156,24 @@ const TinyAngel = (): JSX.Element => {
                                 Donate Tiny Wallet Balance
                             </Typography>
 
+                            <p style={{ textAlign: 'center', opacity: '0.7' }}>
+                                Give the angel dust in your wallet (tokens with value under a small threshold) to charity.
+                            </p>
+
                             <Stack
                             padding="15px 0">
                                 <Typography>
-                                    Tiny Balance Upper Limit (in UST)
+                                    Tiny Balance Threshold
                                 </Typography>
                                 <Slider 
                                 onChange={(e: any) => setNativeWalletState({ tinyValue: +e.target.value })}
                                 color="primary"
                                 min={0.5} 
                                 max={5}
+                                defaultValue={2.5}
+                                marks={marks}
                                 step={0.1}
-                                valueLabelDisplay="auto"/>
+                                valueLabelDisplay="on"/>
                             </Stack>
 
                             { nativeWalletState.tinyBalances.length === 0 &&
@@ -171,6 +191,10 @@ const TinyAngel = (): JSX.Element => {
                                             <Typography variant="h6" sx={{margin: '10px'}}>
                                                 {visualDenomName.get(balance.denom)}
                                             </Typography>
+                                            {/* <p style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span>{toTerraAmount(balance.amount).toFixed(6)}</span>
+                                                <span> ~ {toTerraAmount(ustValue(balance)).toFixed(6)} UST</span>
+                                            </p> */}
                                             <Typography variant="h6" sx={{margin: '10px'}}>
                                                 {toTerraAmount(balance.amount).toFixed(6)}
                                             </Typography>
@@ -192,18 +216,24 @@ const TinyAngel = (): JSX.Element => {
                                 Donate Tiny Rewards from Staking
                             </Typography>
 
+                            <p style={{ textAlign: 'center', opacity: '0.7' }}>
+                                Withdraw your luna staking rewards and give rewards with small balance to charity.
+                            </p>
+
                             <Stack
                             padding="15px 0">
                                 <Typography>
-                                    Tiny Reward Upper Limit (in UST)
+                                    Tiny Reward Threshold
                                 </Typography>
                                 <Slider 
                                 onChange={(e: any) => setRewardState({ tinyReward: +e.target.value })}
                                 color="primary"
-                                min={0.000001} 
-                                max={1}
-                                step={0.000001}
-                                valueLabelDisplay="auto"/>
+                                min={0.5} 
+                                max={5}
+                                defaultValue={2.5}
+                                marks={marks}
+                                step={0.1}
+                                valueLabelDisplay="on"/>
                             </Stack>
 
                             { rewardState.totalRewards.length === 0 &&
