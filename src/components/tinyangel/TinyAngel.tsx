@@ -8,25 +8,17 @@ import useAddress from "hooks/useAddress";
 import { claimReward, donateTinyAmount } from "./msgs";
 import { ANGEL_PROTO_ADDRESS_BOMBAY, visualDenomName } from "../../constants";
 import { useEffectOnce, useSetState } from "react-use";
+import type { RewardState, NativeWalletState } from "./types";
 
-type NativeWalletState = {
-    tinyBalances: any[],
-    tinyValue: number,
-}
-
-type RewardState = {
-    validatorAddresses: string[],
-    tinyReward: number,
-    totalRewards: any[]
-}
-
+//chain <-> ui amount ratio converters
 const toTerraAmount = (amount: number | string): number => + amount / 1000000
 const toChainAmount = (amount: number | string): number => + amount * 1000000
 
-const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
-
 const TinyAngel = (): JSX.Element => {
-    const marks = [{ value: 0.5, label: "0.5 UST" }, { value: 5, label: "5 UST" }]
+    /* modular constants for tiny-angel */
+    const marks = [{ value: 0.5, label: "0.5" }, { value: 5, label: "5.0" }]
+    const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
+    const lowerlimit = 0.01 //below this amount in UST will not be donatable
 
     const LCD = useLCDClient()
     const user_address = useAddress()
@@ -47,22 +39,24 @@ const TinyAngel = (): JSX.Element => {
         totalRewards: [],
     })
 
+    //conversion of tokens to corresponding UST value
     const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom)
 
+    //function to update native tokens to donate on slider change
     const tinyBalanceSetter = async () => {
         const [coins] = await LCD.bank.balance(user_address);
         const tinyBalances = coins.toData()
-        .filter(coin => ustValue(coin) >= toChainAmount(0.5) 
+        .filter(coin => ustValue(coin) >= toChainAmount(lowerlimit) 
         && ustValue(coin) < toChainAmount(nativeWalletState.tinyValue));
 
         setNativeWalletState({ tinyBalances });
     }
 
+    //function to update available rewards to donate on slider change
     const rewardStateSetter = async () => {
-        /* Total rewards (each respected denoms) from staking that has stacked more than or equal to 0.5 in count */
         const { total: totalRewards } = await LCD.distribution.rewards(user_address)
         let relevantRewards = totalRewards.toData()
-        .filter(reward => ustValue(reward) >= toChainAmount(0.5) 
+        .filter(reward => ustValue(reward) >= toChainAmount(lowerlimit) 
         && ustValue(reward) < toChainAmount(rewardState.tinyReward) )
 
         relevantRewards = relevantRewards.map((el: any) => {
@@ -75,11 +69,13 @@ const TinyAngel = (): JSX.Element => {
         setRewardState({ totalRewards: relevantRewards })
     }
 
+    //refetch reward / native token state on tx success to sync UI
     const refetchUserState = () => {
         tinyBalanceSetter()
         rewardStateSetter()
     }
 
+    /* postable msgs populator */
     const onDonate = async () => {
         if ( nativeWalletState.tinyBalances.length === 0 ) {
             alert("You don't have any tiny balances to donate");
@@ -114,7 +110,9 @@ const TinyAngel = (): JSX.Element => {
 
         setMsgs(msgs)
     }
+    /* postable msgs populator */
 
+    //Run once on load
     useEffectOnce(() => {
         ;(async () => {
             /* UST Swaprate to calculate all denominations into appropriate unified tiny amount limit */
@@ -122,12 +120,14 @@ const TinyAngel = (): JSX.Element => {
             const swapMap = swaprates.reduce((map: any, obj: any) => { map.set(obj.denom, obj.swaprate); return map; }, new Map);
             setUstSwapRateMap(swapMap);
 
+            /* fetch and store all validator addresses user has staked to */
             const [delegations] = await LCD.staking.delegations(user_address)
             const validatorAddresses = delegations.map(e => e.validator_address);
             setRewardState({ validatorAddresses })
         })();
     })
 
+    //native token threshold slider callback
     useEffect(() => {
         if ( !user_address || ustSwapRateMap === undefined ) return;
 
@@ -135,6 +135,7 @@ const TinyAngel = (): JSX.Element => {
         return () => clearTimeout(getTinyBalances);
     }, [ user_address, nativeWalletState.tinyValue, ustSwapRateMap ]);
 
+    //rewards threshold slider callback
     useEffect(() => {
         if ( !user_address ) return;
 
@@ -150,13 +151,13 @@ const TinyAngel = (): JSX.Element => {
                     <Paper elevation={3} style={{height: 'fit-content'}}>
                         <Stack spacing={1} sx={{padding: '30px'}}>
                             <Typography 
-                            variant="h5" 
+                            variant="h6" 
                             width="100%" 
-                            textAlign="center">
+                            textAlign="left">
                                 Donate Tiny Wallet Balance
                             </Typography>
 
-                            <p style={{ textAlign: 'center', opacity: '0.7' }}>
+                            <p style={{ textAlign: 'left', opacity: '0.7' }}>
                                 Give the angel dust in your wallet (tokens with value under a small threshold) to charity.
                             </p>
 
@@ -182,27 +183,31 @@ const TinyAngel = (): JSX.Element => {
 
                             {nativeWalletState.tinyBalances.length > 0 && 
                                 <Grid 
+                                sx={{ maxHeight: '225px', overflow: 'scroll' }}
                                 container 
                                 gap="10px">
                                     {nativeWalletState.tinyBalances.map(balance => (
-                                        <Grid
-                                        border="1px solid white"
-                                        borderRadius="10px">
-                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                        <Paper
+                                        elevation={3}
+                                        style={{ backgroundColor: 'grey' }}>
+                                            <Typography variant="inherit" sx={{margin: '10px'}}>
                                                 {visualDenomName.get(balance.denom)}
                                             </Typography>
-                                            {/* <p style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <Typography variant="inherit" sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
                                                 <span>{toTerraAmount(balance.amount).toFixed(6)}</span>
-                                                <span> ~ {toTerraAmount(ustValue(balance)).toFixed(6)} UST</span>
-                                            </p> */}
-                                            <Typography variant="h6" sx={{margin: '10px'}}>
-                                                {toTerraAmount(balance.amount).toFixed(6)}
+                                                <span style={{ fontSize: '12px' }}>
+                                                ≈ {toTerraAmount(ustValue(balance)).toFixed(2)} UST
+                                                </span>
                                             </Typography>
-                                        </Grid>
+                                        </Paper>
                                     ))}
                                 </Grid>
                             }
-                            <Button variant="contained" onClick={ onDonate }>Donate</Button>
+                            <Button variant="contained" 
+                            style={{ marginTop: '30px' }} 
+                            onClick={ onDonate }>
+                                Donate
+                            </Button>
                         </Stack>
                     </Paper>
                 </Grid>
@@ -210,13 +215,13 @@ const TinyAngel = (): JSX.Element => {
                     <Paper elevation={3} style={{height: 'fit-content'}}>
                         <Stack spacing={1} sx={{padding: '30px'}}>
                             <Typography 
-                            variant="h5" 
+                            variant="h6" 
                             width="100%" 
-                            textAlign="center">
+                            textAlign="left">
                                 Donate Tiny Rewards from Staking
                             </Typography>
 
-                            <p style={{ textAlign: 'center', opacity: '0.7' }}>
+                            <p style={{ textAlign: 'left', opacity: '0.7' }}>
                                 Withdraw your luna staking rewards and give rewards with small balance to charity.
                             </p>
 
@@ -242,23 +247,31 @@ const TinyAngel = (): JSX.Element => {
 
                             {rewardState.totalRewards.length > 0 && 
                                 <Grid 
+                                sx={{ maxHeight: '225px', overflow: 'scroll' }}
                                 container 
                                 gap="10px">
                                     {rewardState.totalRewards.map(reward => (
-                                        <Grid
-                                        border="1px solid white"
-                                        borderRadius="10px">
-                                            <Typography variant="h6" sx={{margin: '10px'}}>
+                                        <Paper
+                                        elevation={3}
+                                        style={{ backgroundColor: 'grey' }}>
+                                            <Typography variant="inherit" sx={{margin: '10px'}}>
                                                 {visualDenomName.get(reward.denom)}
                                             </Typography>
-                                            <Typography variant="h6" sx={{margin: '10px'}}>
-                                                {toTerraAmount(reward.amount).toFixed(6)}
+                                            <Typography variant="inherit" sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
+                                                <span>{toTerraAmount(reward.amount).toFixed(6)}</span>
+                                                <span style={{ fontSize: '12px' }}>
+                                                ≈ {toTerraAmount(ustValue(reward)).toFixed(2)} UST
+                                                </span>
                                             </Typography>
-                                        </Grid>
+                                        </Paper>
                                     ))}
                                 </Grid>
                             }
-                            <Button variant="contained" onClick={ onRewardDonate }>Withdraw Rewards and Donate</Button>
+                            <Button variant="contained" 
+                            style={{ marginTop: '30px' }} 
+                            onClick={ onRewardDonate }>
+                                Withdraw Rewards and Donate
+                            </Button>
                         </Stack>
                     </Paper>
                 </Grid>
