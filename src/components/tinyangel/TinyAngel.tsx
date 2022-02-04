@@ -203,8 +203,15 @@ const TinyAngel = (): JSX.Element => {
                                     ))}
                                 </Grid>
                             }
+
+                            <br/>
+                            <Typography sx={{ fontSize: '15px' }}>
+                                Total Donation Amount: &nbsp;
+                                {toTerraAmount(nativeWalletState.tinyBalances.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
+                                UST
+                            </Typography>
+
                             <Button variant="contained" 
-                            style={{ marginTop: '30px' }} 
                             onClick={ onDonate }>
                                 Donate
                             </Button>
@@ -267,8 +274,15 @@ const TinyAngel = (): JSX.Element => {
                                     ))}
                                 </Grid>
                             }
+                            
+                            <br/>
+                            <Typography sx={{ fontSize: '15px' }}>
+                                Total Donation Amount: &nbsp;
+                                {toTerraAmount(rewardState.totalRewards.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
+                                UST
+                            </Typography>
+
                             <Button variant="contained" 
-                            style={{ marginTop: '30px' }} 
                             onClick={ onRewardDonate }>
                                 Withdraw Rewards and Donate
                             </Button>
