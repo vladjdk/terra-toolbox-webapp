@@ -32,10 +32,10 @@ export const ANGEL_PROTO_ADDRESS_BOMBAY = "terra13au3ag9df7khs2sv7m485e5c5vfwwft
 export const visualDenomName = new Map([
     ["uusd", "UST"], ["uluna", "Luna"], ["usdr", "SDT"],
     ["ukrw", "KRT"], ["umnt", "MNT"], ["ueur", "EUT"],
-    ["ucny", "CNY"], ["ujpy", "JPY"], ["ugbp", "GBP"],
-    ["uinr", "INR"], ["ucad", "CAT"], ["uchf", "CHF"],
-    ["uaud", "AUT"], ["usgd", "SGD"], ["uthb", "THB"],
-    ["usek", "SEK"], ["unok", "NOK"], ["udkk", "DKK"],
-    ["uidr", "IDR"], ["uphp", "PHP"], ["uhkd", "HKT"],
-    ["umyr", "MYR"], ["utwd", "TWD"]
+    ["ucny", "CNT"], ["ujpy", "JPT"], ["ugbp", "GBT"],
+    ["uinr", "INT"], ["ucad", "CAT"], ["uchf", "CHT"],
+    ["uaud", "AUT"], ["usgd", "SGT"], ["uthb", "THT"],
+    ["usek", "SET"], ["unok", "NOT"], ["udkk", "DKT"],
+    ["uidr", "IDT"], ["uphp", "PHT"], ["uhkd", "HKT"],
+    ["umyr", "MYT"], ["utwd", "TWT"]
 ])

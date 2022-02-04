@@ -42,6 +42,11 @@ const TinyAngel = (): JSX.Element => {
     //conversion of tokens to corresponding UST value
     const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom)
 
+    //for slider
+    const valueText = (value: number) => {
+        return `${value} UST`;
+      }
+
     //function to update native tokens to donate on slider change
     const tinyBalanceSetter = async () => {
         const [coins] = await LCD.bank.balance(user_address);
@@ -174,11 +179,16 @@ const TinyAngel = (): JSX.Element => {
                                 defaultValue={2.5}
                                 marks={marks}
                                 step={0.1}
+                                getAriaValueText={valueText}
+                                valueLabelFormat={valueText}
                                 valueLabelDisplay="on"/>
                             </Stack>
 
                             { nativeWalletState.tinyBalances.length === 0 &&
-                                <Typography>No Tiny Balances</Typography>
+                                <Paper elevation={0}
+                                style={{ backgroundColor: 'grey', height: '100px', display: 'grid', placeItems: 'center' }}>
+                                    No Tiny Balances
+                                </Paper>
                             }
 
                             {nativeWalletState.tinyBalances.length > 0 && 
@@ -190,10 +200,18 @@ const TinyAngel = (): JSX.Element => {
                                         <Paper
                                         elevation={3}
                                         style={{ backgroundColor: 'grey' }}>
-                                            <Typography variant="inherit" sx={{margin: '10px'}}>
+                                            <Typography 
+                                            variant="inherit" 
+                                            sx={{ margin: '10px', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                <img 
+                                                src={`images/svg/${visualDenomName.get(balance.denom)}.svg`}
+                                                style={{ height: '17.5px', width: '17.5px', marginBottom: '2.5px' }}/>
+                                                &nbsp;
                                                 {visualDenomName.get(balance.denom)}
                                             </Typography>
-                                            <Typography variant="inherit" sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
+                                            
+                                            <Typography variant="inherit" 
+                                            sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
                                                 <span>{toTerraAmount(balance.amount).toFixed(6)}</span>
                                                 <span style={{ fontSize: '12px' }}>
                                                 ≈ {toTerraAmount(ustValue(balance)).toFixed(2)} UST
@@ -208,10 +226,12 @@ const TinyAngel = (): JSX.Element => {
                             <Typography sx={{ fontSize: '15px' }}>
                                 Total Donation Amount: &nbsp;
                                 {toTerraAmount(nativeWalletState.tinyBalances.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
-                                UST
+                                &nbsp;UST
                             </Typography>
 
-                            <Button variant="contained" 
+                            <Button 
+                            disabled={nativeWalletState.tinyBalances.length === 0}
+                            variant="contained" 
                             onClick={ onDonate }>
                                 Donate
                             </Button>
@@ -245,11 +265,16 @@ const TinyAngel = (): JSX.Element => {
                                 defaultValue={2.5}
                                 marks={marks}
                                 step={0.1}
+                                getAriaValueText={valueText}
+                                valueLabelFormat={valueText}
                                 valueLabelDisplay="on"/>
                             </Stack>
 
                             { rewardState.totalRewards.length === 0 &&
-                                <Typography>No Staking Rewards</Typography>
+                                <Paper elevation={0}
+                                style={{ backgroundColor: 'grey', height: '100px', display: 'grid', placeItems: 'center' }}>
+                                    No Staking Rewards
+                                </Paper>
                             }
 
                             {rewardState.totalRewards.length > 0 && 
@@ -261,10 +286,16 @@ const TinyAngel = (): JSX.Element => {
                                         <Paper
                                         elevation={3}
                                         style={{ backgroundColor: 'grey' }}>
-                                            <Typography variant="inherit" sx={{margin: '10px'}}>
+                                            <Typography variant="inherit" 
+                                            sx={{ margin: '10px', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                                                <img 
+                                                src={`images/svg/${visualDenomName.get(reward.denom)}.svg`}
+                                                style={{ height: '17.5px', width: '17.5px', marginBottom: '2.5px' }}/>
+                                                &nbsp;
                                                 {visualDenomName.get(reward.denom)}
                                             </Typography>
-                                            <Typography variant="inherit" sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
+                                            <Typography variant="inherit" 
+                                            sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
                                                 <span>{toTerraAmount(reward.amount).toFixed(6)}</span>
                                                 <span style={{ fontSize: '12px' }}>
                                                 ≈ {toTerraAmount(ustValue(reward)).toFixed(2)} UST
@@ -279,10 +310,12 @@ const TinyAngel = (): JSX.Element => {
                             <Typography sx={{ fontSize: '15px' }}>
                                 Total Donation Amount: &nbsp;
                                 {toTerraAmount(rewardState.totalRewards.map(b => ustValue(b)).reduce((p, c) => p + c, 0)).toFixed(2)}
-                                UST
+                                &nbsp;UST
                             </Typography>
 
-                            <Button variant="contained" 
+                            <Button 
+                            disabled={rewardState.totalRewards.length === 0}
+                            variant="contained" 
                             onClick={ onRewardDonate }>
                                 Withdraw Rewards and Donate
                             </Button>
