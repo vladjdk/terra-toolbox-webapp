@@ -102,7 +102,7 @@ const TinyAngel = (): JSX.Element => {
             return Object.assign(obj, { [el.denom]: el.amount })
         }, {})
 
-        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN, balancesObj)
+        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN , balancesObj)
         setMsgs(msgs);
     }
 
