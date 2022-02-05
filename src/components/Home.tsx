@@ -14,6 +14,10 @@ const tools = [
         link: '/freewilly',
         description: 'Withdraw Anchor liquidations with no additional fee!'
     },
+    {   name: 'Tiny Angel',
+        link: '/tinyangel',
+        description: "Donate Tiny Balances in your wallet or rewards to Angel Protocol."
+    },
     {
         name: 'Coming Soon!',
         link: '/',

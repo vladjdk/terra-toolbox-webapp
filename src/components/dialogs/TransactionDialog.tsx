@@ -1,10 +1,10 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import { Fee, MsgExecuteContract, TxInfo } from '@terra-money/terra.js';
+import { Fee, MsgExecuteContract, MsgSend, MsgWithdrawDelegatorReward, TxInfo } from '@terra-money/terra.js';
 import { TxResult, useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 import { useEffect, useState } from 'react';
 
 interface TransactionDialogProps {
-    msgs: MsgExecuteContract[],
+    msgs: MsgExecuteContract[] | (MsgSend | MsgWithdrawDelegatorReward)[],
     fee?: Fee,
     title?: string,
     pollingMsg?: string,
