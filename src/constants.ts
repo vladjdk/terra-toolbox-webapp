@@ -27,6 +27,7 @@ export const TX_POLLING_INTERVAL = 1000;
 
 /* terra:addresses */
 export const ANGEL_PROTO_ADDRESS_BOMBAY = "terra13au3ag9df7khs2sv7m485e5c5vfwwftlrzf7cw";
+export const ANGEL_PROTO_ADDRESS_MAIN = "terra1zxtczmxtw8mk8xncvr8lcq2qmvk4dz88ek6f79";
 
 /* terra:balance-map */
 export const visualDenomName = new Map([
