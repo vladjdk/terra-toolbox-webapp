@@ -18,7 +18,7 @@ const TinyAngel = (): JSX.Element => {
     /* modular constants for tiny-angel */
     const marks = [{ value: 0.5, label: "0.5" }, { value: 5, label: "5.0" }]
     const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
-    const lowerlimit = 0.01 //below this amount in UST will not be donatable
+    const lowerlimit = 0.000001 //below this amount in UST will not be donatable
 
     const LCD = useLCDClient();
     const user_address = useAddress();
@@ -41,7 +41,7 @@ const TinyAngel = (): JSX.Element => {
     })
 
     //conversion of tokens to corresponding UST value
-    const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom)
+    const ustValue = (e: any) => Number( e.amount ) / ustSwapRateMap.get(e.denom || "uusd")
 
     //for slider
     const valueText = (value: number) => `${value} UST`;
@@ -127,8 +127,9 @@ const TinyAngel = (): JSX.Element => {
     }
     /* postable msgs populator */
 
-    //Run once on load
-    useEffectOnce(() => {
+    useEffect(() => {
+        if (!user_address) return;
+
         ;(async () => {
             /* UST Swaprate to calculate all denominations into appropriate unified tiny amount limit */
             const { data: swaprates } = await axios.get(ustSwapRateQuery);
@@ -140,7 +141,7 @@ const TinyAngel = (): JSX.Element => {
             const validatorAddresses = delegations.map(e => e.validator_address);
             setRewardState({ validatorAddresses })
         })();
-    })
+    }, [ user_address ]);
 
     //native token threshold slider callback
     useEffect(() => {
@@ -152,11 +153,11 @@ const TinyAngel = (): JSX.Element => {
 
     //rewards threshold slider callback
     useEffect(() => {
-        if ( !user_address ) return;
+        if ( !user_address || ustSwapRateMap === undefined ) return;
 
         const getTotalRewards = setTimeout(rewardStateSetter, 200);
         return () => clearTimeout(getTotalRewards);
-    }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses ])
+    }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses, ustSwapRateMap ])
 
     useEffect( refetchUserState , [ status ])
 
@@ -212,8 +213,9 @@ const TinyAngel = (): JSX.Element => {
                                 sx={{ maxHeight: '225px', overflow: 'scroll' }}
                                 container 
                                 gap="10px">
-                                    {nativeWalletState.tinyBalances.map(balance => (
+                                    {nativeWalletState.tinyBalances.map((balance, i) => (
                                         <Paper
+                                        key={i}
                                         elevation={3}
                                         style={{ backgroundColor: 'grey' }}>
                                             <Typography 
@@ -302,8 +304,9 @@ const TinyAngel = (): JSX.Element => {
                                 sx={{ maxHeight: '225px', overflow: 'scroll' }}
                                 container 
                                 gap="10px">
-                                    {rewardState.totalRewards.map(reward => (
+                                    {rewardState.totalRewards.map((reward, i) => (
                                         <Paper
+                                        key={i}
                                         elevation={3}
                                         style={{ backgroundColor: 'grey' }}>
                                             <Typography variant="inherit" 
