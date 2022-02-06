@@ -18,7 +18,8 @@ const TinyAngel = (): JSX.Element => {
     /* modular constants for tiny-angel */
     const marks = [{ value: 0.5, label: "0.5" }, { value: 5, label: "5.0" }]
     const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
-    const lowerlimit = 0.000001 //below this amount in UST will not be donatable
+    const tinybalance_lowerlimit = 0.000001 //below this amount in UST will not be donatable
+    const tinyrewards_lowerlimit = 0.000001
 
     const LCD = useLCDClient();
     const user_address = useAddress();
@@ -58,8 +59,10 @@ const TinyAngel = (): JSX.Element => {
 
         const [coins] = await LCD.bank.balance(user_address);
         const tinyBalances = coins.toData()
-        .filter(coin => ustValue(coin) >= toChainAmount(lowerlimit) 
-        && ustValue(coin) < toChainAmount(nativeWalletState.tinyValue));
+        .filter(coin => 
+            ustValue(coin) >= toChainAmount(tinybalance_lowerlimit + coin.denom === "uusd" ? 0.04 : 0)
+            //if uusd is lower than 0.04 then the tx may fail because of fees
+            && ustValue(coin) < toChainAmount(nativeWalletState.tinyValue));
 
         setNativeWalletState({ tinyBalances });
     }
@@ -73,13 +76,13 @@ const TinyAngel = (): JSX.Element => {
 
         const { total: totalRewards } = await LCD.distribution.rewards(user_address)
         let relevantRewards = totalRewards.toData()
-        .filter(reward => ustValue(reward) >= toChainAmount(lowerlimit) 
+        .filter(reward => ustValue(reward) >= toChainAmount(tinyrewards_lowerlimit) 
         && ustValue(reward) < toChainAmount(rewardState.tinyReward) )
 
         relevantRewards = relevantRewards.map((el: any) => {
             return {
                 ...el,
-                amount: parseInt(el.amount)
+                amount: Math.floor(el.amount)
             }
         })
 
