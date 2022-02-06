@@ -381,7 +381,7 @@ const TinyAngel = (): JSX.Element => {
             </Grid>
         </Container>
         { msgs.length !== 0 && 
-            <TransactionDialog title="Donating..." msgs={msgs} onSuccess={ refetchUserState } onClose={() => setMsgs([])}/>
+            <TransactionDialog title="Donating..." msgs={msgs} memo="tinyangel_toolkit" onSuccess={ refetchUserState } onClose={() => setMsgs([])}/>
         }
         </>
     )
