@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useLCDClient, useWallet } from "@terra-money/wallet-provider";
 import useAddress from "hooks/useAddress";
 import { claimReward, donateTinyAmount } from "./msgs";
-import { ANGEL_PROTO_ADDRESS_MAIN, ANGEL_PROTO_ADDRESS_BOMBAY, visualDenomName } from "../../constants";
+import { ANGEL_PROTO_ADDRESS_MAIN, visualDenomName } from "../../constants";
 import { useEffectOnce, useSetState } from "react-use";
 import type { RewardState, NativeWalletState } from "./types";
 
@@ -121,7 +121,7 @@ const TinyAngel = (): JSX.Element => {
             return Object.assign(obj, { [el.denom]: el.amount })
         }, {})
 
-        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_BOMBAY , balancesObj)
+        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN, balancesObj)
         setMsgs(msgs);
     }
 
@@ -138,7 +138,7 @@ const TinyAngel = (): JSX.Element => {
                 return Object.assign(obj, { [el.denom]: el.amount })
             }, {})
 
-            const [ sendRewardsToAngelMsg ] = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_BOMBAY, tinyRewardsObj);
+            const [ sendRewardsToAngelMsg ] = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN, tinyRewardsObj);
             msgs.push(sendRewardsToAngelMsg);
         }
 
