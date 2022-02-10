@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 interface TransactionDialogProps {
     msgs: MsgExecuteContract[] | (MsgSend | MsgWithdrawDelegatorReward)[],
     fee?: Fee,
+    memo?: string,
     title?: string,
     pollingMsg?: string,
     successMsg?: string,
@@ -30,6 +31,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
 
     const {
         msgs,
+        memo,
         title = 'Waiting for Transaction',
         pollingMsg = 'Please wait...',
         successMsg = <p>Transaction successful!: <a href={link} target="_blank">[TX Info]</a></p>,
@@ -42,7 +44,7 @@ export function TransactionDialog(props: TransactionDialogProps) {
     useEffect(() => {
         if (wallet) {
             wallet.post({
-                msgs: msgs
+                msgs, memo,
             }).then((txResult: TxResult) => {
                 setTransactionState(TransactionState.polling);
                 pollTransaction(txResult.result.txhash, MAX_POLLING_DURATION, POLLING_INTERVAL).then(txInfo => {

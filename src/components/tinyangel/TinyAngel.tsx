@@ -19,11 +19,13 @@ const TinyAngel = (): JSX.Element => {
     const marks = [{ value: 0.5, label: "0.5" }, { value: 5, label: "5.0" }]
     const ustSwapRateQuery = "https://fcd.terra.dev/v1/market/swaprate/uusd"
     const lowerlimit = 0.000001 //below this amount in UST will not be donatable
+    const general_ust_fee = toChainAmount(0.04); //for native balance error
 
     const LCD = useLCDClient();
     const user_address = useAddress();
     const { status } = useWallet();
 
+    const [mapPopulated, setMapPopulated] = useState<boolean>(false);
     const [ustSwapRateMap, setUstSwapRateMap] = useState<any>(undefined)
     const [msgs, setMsgs] = useState<(MsgSend | MsgWithdrawDelegatorReward)[]>([])
 
@@ -51,22 +53,31 @@ const TinyAngel = (): JSX.Element => {
 
     //function to update native tokens to donate on slider change
     const tinyBalanceSetter = async () => {
-        if ( !user_address ) {
+        if ( !user_address || !mapPopulated ) {
             setNativeWalletState({ tinyBalances: [] });
             return;
         }
 
         const [coins] = await LCD.bank.balance(user_address);
         const tinyBalances = coins.toData()
-        .filter(coin => ustValue(coin) >= toChainAmount(lowerlimit) 
+        .filter(coin => 
+        ustValue(coin) >= toChainAmount(lowerlimit)
         && ustValue(coin) < toChainAmount(nativeWalletState.tinyValue));
+
+        tinyBalances.forEach((coin, index) => {
+            if (coin.denom === "uusd") {
+                + coin.amount > general_ust_fee ? 
+                coin.amount = `${+ coin.amount - general_ust_fee}` :
+                tinyBalances.splice(index, 1)
+            }
+        })
 
         setNativeWalletState({ tinyBalances });
     }
 
     //function to update available rewards to donate on slider change
     const rewardStateSetter = async () => {
-        if ( !user_address ) {
+        if ( !user_address || !mapPopulated ) {
             setRewardState({ totalRewards: [] });
             return;
         }
@@ -79,11 +90,19 @@ const TinyAngel = (): JSX.Element => {
         relevantRewards = relevantRewards.map((el: any) => {
             return {
                 ...el,
-                amount: parseInt(el.amount)
+                amount: Math.floor(el.amount)
             }
         })
 
         setRewardState({ totalRewards: relevantRewards })
+    }
+
+    const remove = (type: string, denom: string) => {
+        if ( type === "native" ) {
+            setNativeWalletState(prev => ({ tinyBalances: prev.tinyBalances.filter(coin => coin.denom !== denom)}))
+        } else {
+            setRewardState(prev => ({ totalRewards: prev.totalRewards.filter(coin => coin.denom !== denom)}))
+        }
     }
 
     //refetch reward / native token state on tx success to sync UI
@@ -102,7 +121,7 @@ const TinyAngel = (): JSX.Element => {
             return Object.assign(obj, { [el.denom]: el.amount })
         }, {})
 
-        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN , balancesObj)
+        const msgs = donateTinyAmount(user_address, ANGEL_PROTO_ADDRESS_MAIN, balancesObj)
         setMsgs(msgs);
     }
 
@@ -140,24 +159,26 @@ const TinyAngel = (): JSX.Element => {
             const [delegations] = await LCD.staking.delegations(user_address)
             const validatorAddresses = delegations.map(e => e.validator_address);
             setRewardState({ validatorAddresses })
+
+            setMapPopulated(true);
         })();
     }, [ user_address ]);
 
     //native token threshold slider callback
     useEffect(() => {
-        if ( !user_address || ustSwapRateMap === undefined ) return;
+        if ( !user_address || ustSwapRateMap === undefined || !mapPopulated ) return;
 
         const getTinyBalances = setTimeout(tinyBalanceSetter, 200)
         return () => clearTimeout(getTinyBalances);
-    }, [ user_address, nativeWalletState.tinyValue, ustSwapRateMap ]);
+    }, [ user_address, nativeWalletState.tinyValue, ustSwapRateMap, mapPopulated ]);
 
     //rewards threshold slider callback
     useEffect(() => {
-        if ( !user_address || ustSwapRateMap === undefined ) return;
+        if ( !user_address || ustSwapRateMap === undefined || !mapPopulated ) return;
 
         const getTotalRewards = setTimeout(rewardStateSetter, 200);
         return () => clearTimeout(getTotalRewards);
-    }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses, ustSwapRateMap ])
+    }, [ user_address, rewardState.tinyReward, rewardState.validatorAddresses, ustSwapRateMap, mapPopulated ])
 
     useEffect( refetchUserState , [ status ])
 
@@ -226,6 +247,12 @@ const TinyAngel = (): JSX.Element => {
                                                 style={{ height: '17.5px', width: '17.5px', marginBottom: '2.5px' }}/>
                                                 &nbsp;
                                                 {visualDenomName.get(balance.denom)}
+                                                <button 
+                                                style={{ 
+                                                    backgroundColor: "transparent", border: "none", opacity: '0.7',
+                                                    margin: '0 0 3px 1px', cursor: "pointer",
+                                                }}
+                                                onClick={() => remove("native", balance.denom)}>x</button>
                                             </Typography>
                                             
                                             <Typography variant="inherit" 
@@ -316,6 +343,12 @@ const TinyAngel = (): JSX.Element => {
                                                 style={{ height: '17.5px', width: '17.5px', marginBottom: '2.5px' }}/>
                                                 &nbsp;
                                                 {visualDenomName.get(reward.denom)}
+                                                <button 
+                                                style={{ 
+                                                    backgroundColor: "transparent", border: "none", opacity: '0.7',
+                                                    margin: '0 0 3px 1px', cursor: "pointer",
+                                                }}
+                                                onClick={() => remove("reward", reward.denom)}>x</button>
                                             </Typography>
                                             <Typography variant="inherit" 
                                             sx={{margin: '10px', display: 'flex', flexDirection: 'column' }}>
@@ -348,7 +381,7 @@ const TinyAngel = (): JSX.Element => {
             </Grid>
         </Container>
         { msgs.length !== 0 && 
-            <TransactionDialog title="Donating..." msgs={msgs} onSuccess={ refetchUserState } onClose={() => setMsgs([])}/>
+            <TransactionDialog title="Donating..." msgs={msgs} memo="tinyangel_toolkit" onSuccess={ refetchUserState } onClose={() => setMsgs([])}/>
         }
         </>
     )
