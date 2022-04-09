@@ -30,19 +30,37 @@ export interface Token {
 export interface ContractAddress {
     contract_addr: string
 }
+
+export interface ClusterInfo {
+    name: string,
+    description: string,
+}
+
+export interface ClusterList {
+    contract_infos: ClusterItem[]
+}
+
+export interface ClusterItem {
+    contract_addr: string,
+    active: boolean
+}
   
-export const useNebula = (contractAddress: AccAddress) => {
+export const useNebula = (factoryAddress: AccAddress) => {
     const { post } = useWallet();
     // TODO: Calculate fee via simulation if possible.
     const fee = useFee();
     const userWalletAddr = useAddress();
     const lcdClient = useLCDClient();
 
-    function _query<T>(queryMsg: any) {
-        return lcdClient.wasm.contractQuery<T>(contractAddress, queryMsg);
+    function _queryFactory<T>(queryMsg: any) {
+        return lcdClient.wasm.contractQuery<T>(factoryAddress, queryMsg);
     }
 
-    function _createExecuteMsg(executeMsg: any, coins?: Coins.Input) {
+    function _queryCluster<T>( clusterAddress: AccAddress, queryMsg: any) {
+        return lcdClient.wasm.contractQuery<T>(clusterAddress, queryMsg);
+    }
+
+    function _createExecuteMsg(executeMsg: any, contractAddress: string, coins?: Coins.Input) {
         return new MsgExecuteContract(
             userWalletAddr,
             contractAddress,
@@ -51,14 +69,48 @@ export const useNebula = (contractAddress: AccAddress) => {
         );
     }
 
-    function getClusterState(): Promise<ClusterState> {
-        return _query<ClusterState>({
-            target: {}
-        })
+    //factory
+    function getClusterList(): Promise<ClusterList> {
+        return _queryFactory<ClusterList>(
+            {
+                cluster_list: {}
+            }
+        );
+    }
+
+    // cluster
+    function getClusterState(clusterAddress: string): Promise<ClusterState> {
+        return _queryCluster<ClusterState>(
+            clusterAddress,
+            {
+                cluster_state: {}
+            }
+        );
+    }
+
+    function getClusterInfo(clusterAddress: string): Promise<ClusterInfo> {
+        return _queryCluster<ClusterInfo>(
+            clusterAddress,
+            {
+                cluster_info: {}
+            }
+        );
+    }
+
+    function getTarget(clusterAddress: string): Promise<Target> {
+        return _queryCluster<Target>(
+            clusterAddress,
+            {
+                target: {}
+            }
+        );
     }
 
     return {
-        getClusterState
+        getClusterList,
+        getClusterState,
+        getClusterInfo,
+        getTarget
     };
 };
   
