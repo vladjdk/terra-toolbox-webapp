@@ -1,10 +1,6 @@
-import LiquidationWithdrawals from 'components/free-willy/LiquidationWithdrawals';
-import LiquidationBidChart from 'components/free-willy/LiquidationBidChart';
-import PlaceBid from 'components/free-willy/PlaceBid';
-import MyBids from 'components/free-willy/MyBids';
 import { Container, Paper, Grid } from '@mui/material';
 import useNetwork from 'hooks/useNetwork';
-import { useAnchorLiquidationContract, BidPool, Bid } from 'hooks/useAnchorLiquidationContract';
+import { useNebula, ClusterList, ClusterState } from 'hooks/useNebula';
 import { useEffect, useState } from 'react';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 
@@ -12,10 +8,40 @@ export function FreeWilly() {
     const network = useNetwork();
     const wallet = useConnectedWallet();
     const lcd = useLCDClient();
+    const { getClusterList, getClusterState, getClusterInfo, getTarget } = useNebula(network.contracts.nebulaFactory);
+
+    const [clusterAddresses, setClusterAddresses] = useState<string[]>([]);
+    const [selectedCluster, setSelectedCluster] = useState<string>();
+    const [clusterState, setClusterState] = useState<ClusterState>();
+    
+    useEffect(() => {
+        getAllClusters().then()
+    }, [wallet, network])
 
     useEffect(() => {
-        
-    }, [wallet, network])
+        if(selectedCluster) {
+            getInfoForCluster(selectedCluster).then()
+        }
+    }), [selectedCluster]
+
+    const getAllClusters = async () => {
+        getClusterList().then(data => {
+            const clusterAddresses: string[] = [];
+            data.contract_infos.forEach(contract => {
+                if(contract.active) {
+                    clusterAddresses.push(contract.contract_addr);
+                }
+            });
+            setClusterAddresses(clusterAddresses);
+            setSelectedCluster(clusterAddresses[0])
+        })
+    }
+
+    const getInfoForCluster = async (clusterAddress: string) => {
+        getClusterState(clusterAddress).then(data => {
+            setClusterState(data);
+        })
+    }
 
     const onRefresh = () => {
         
@@ -23,6 +49,7 @@ export function FreeWilly() {
 
     return (
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
+
         </Container>
     );
   }
