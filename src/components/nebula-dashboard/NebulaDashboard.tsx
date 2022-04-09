@@ -13,10 +13,8 @@ export function FreeWilly() {
     const wallet = useConnectedWallet();
     const lcd = useLCDClient();
 
-    
-
     useEffect(() => {
-
+        
     }, [wallet, network])
 
     const onRefresh = () => {

@@ -16,7 +16,8 @@ const networks: Record<string, ToolboxNetworkInfo> = {
     contracts: {
       beth: "terra1dzhzukyezv0etz22ud940z7adyv7xgcjkahuun",
       bluna: "terra1kc87mu460fwkqte29rquh4hc20m54fxwtsx7gp",
-      anchorLiquidation: "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u"
+      anchorLiquidation: "terra1e25zllgag7j9xsun3me4stnye2pcg66234je3u",
+      nebulaFactory: "" //TODO
     },
     fee: { gasPrice: 0.15, amount: 100000 },
   },
@@ -33,7 +34,8 @@ const networks: Record<string, ToolboxNetworkInfo> = {
     contracts: {
       beth: "terra19mkj9nec6e3y5754tlnuz4vem7lzh4n0lc2s3l",
       bluna: "terra1u0t35drzyy0mujj8rkdyzhe264uls4ug3wdp3x",
-      anchorLiquidation: "terra18j0wd0f62afcugw2rx5y8e6j5qjxd7d6qsc87r"
+      anchorLiquidation: "terra18j0wd0f62afcugw2rx5y8e6j5qjxd7d6qsc87r",
+      nebulaFactory: "terra144wvr259rwvmg37x7k4y8sd9k6uzykl3s6dmt7"
     },
     fee: { gasPrice: 0.15, amount: 100000 },
   },
