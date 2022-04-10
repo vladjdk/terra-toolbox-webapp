@@ -19,6 +19,11 @@ const tools = [
         description: "Donate Tiny Balances in your wallet or rewards to Angel Protocol."
     },
     {
+        name: "Nebula Dashboard",
+        link: "/nebula",
+        description: "Displays Nebula stats and generates optimal rebalance."
+    },
+    {
         name: 'Coming Soon!',
         link: '/',
         description: 'More tools will be added in the future!  Stay tuned!'

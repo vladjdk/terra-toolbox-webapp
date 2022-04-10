@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wallet } from 'components/Wallet';
 import { theme } from 'theme';
 import Icons from "Icons";
+import { NebulaDashboard } from "components/nebula-dashboard/NebulaDashboard";
 
 const RecoilInit = () => {
   useInitAddress();
@@ -46,6 +47,7 @@ export function Main() {
           <Route path="/" element={<Home/>} />
           <Route path="freewilly" element={<FreeWilly/>} />
           <Route path="tinyangel" element={<TinyAngel/>} />
+          <Route path="nebula" element={<NebulaDashboard/>} />
           <Route path="*" element={<Navigate replace to="/"/>}/>
         </Routes>
       </ThemeProvider>

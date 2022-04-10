@@ -37,12 +37,7 @@ export interface ClusterInfo {
 }
 
 export interface ClusterList {
-    contract_infos: ClusterItem[]
-}
-
-export interface ClusterItem {
-    contract_addr: string,
-    active: boolean
+    contract_infos: any
 }
   
 export const useNebula = (factoryAddress: AccAddress) => {
