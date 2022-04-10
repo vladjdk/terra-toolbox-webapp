@@ -5,11 +5,11 @@ import useAddress from "./useAddress";
 
 export interface ClusterState {
     outstanding_balance_tokens: string,
-    prices: [string],
+    prices: string[],
     inv: [string],
     penalty: string,
     cluster_token: string,
-    target: Target
+    target: Target[]
     cluster_contract_address: string,
     active: boolean
 }

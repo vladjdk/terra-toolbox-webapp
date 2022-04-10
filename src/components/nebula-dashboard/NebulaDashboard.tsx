@@ -4,6 +4,11 @@ import { useNebula, ClusterList, ClusterState, ClusterInfo } from 'hooks/useNebu
 import { useEffect, useState } from 'react';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 
+export interface Cluster {
+    cluster_info: ClusterInfo,
+    cluster_addr: string,
+}
+
 export function NebulaDashboard() {
     const network = useNetwork();
     const wallet = useConnectedWallet();
@@ -11,7 +16,8 @@ export function NebulaDashboard() {
     const { getClusterList, getClusterState, getClusterInfo, getTarget } = useNebula(network.contracts.nebulaFactory);
 
     const [clusterAddresses, setClusterAddresses] = useState<string[]>([]);
-    const [selectedCluster, setSelectedCluster] = useState<string>();
+    const [clusters, setClusters] = useState<Cluster[]>();
+    const [selectedCluster, setSelectedCluster] = useState<Cluster>();
     const [clusterState, setClusterState] = useState<ClusterState>();
     const [clusterInfo, setClusterInfo] = useState<ClusterInfo>();
     
@@ -21,29 +27,38 @@ export function NebulaDashboard() {
 
     useEffect(() => {
         if(selectedCluster) {
-            getInfoForCluster(selectedCluster).then()
+            getStateForCluster(selectedCluster.cluster_addr).then()
         }
     }, [selectedCluster]) 
 
     const getAllClusters = async () => {
-        getClusterList().then(data => {
+        getClusterList().then(async data => {
             const clusterAddresses: string[] = [];
+            const clusterPromises: Promise<Cluster>[] = [];
             data.contract_infos.forEach((contract: [active: any, contract_addr: string]) => {
-                if(contract) {
+                if(contract[1]) {
                     clusterAddresses.push(contract[0]);
+                    clusterPromises.push(getInfoForCluster(contract[0]));
                 }
             });
             setClusterAddresses(clusterAddresses);
-            setSelectedCluster(clusterAddresses[0])
+            Promise.all(clusterPromises).then(c => {
+                setClusters(c);
+                setSelectedCluster(c[0]);
+            })
         })
     }
 
-    const getInfoForCluster = async (clusterAddress: string) => {
+    const getInfoForCluster = async (clusterAddress: string): Promise<Cluster> => {
+        return {
+            cluster_info: await getClusterInfo(clusterAddress),
+            cluster_addr: clusterAddress
+        }
+    }
+
+    const getStateForCluster = async (clusterAddress: string) => {
         getClusterState(clusterAddress).then(data => {
             setClusterState(data);
-        });
-        getClusterInfo(clusterAddress).then(data => {
-            setClusterInfo(data);
         });
     }
 
@@ -52,28 +67,29 @@ export function NebulaDashboard() {
     }
 
     const handleChange = (e: any) => {
-        setSelectedCluster(e.target.value as string);
+        setSelectedCluster(clusters?.find(cluster => cluster.cluster_info.name == e.target.value) as Cluster);
     }
 
     return (
         <Container sx={{maxWidth: '1200px', padding: '10px'}}>
             <Select
-                value={selectedCluster}
+                value={selectedCluster ? selectedCluster?.cluster_info.name : ""}
                 onChange={handleChange}
             >
                 {
-                    clusterAddresses?.map(address => {
+                    clusters?.map(info => {
                         return (
-                            <MenuItem key={address} value={address}>
-                                {address}
+                            <MenuItem key={info.cluster_info.name} value={info.cluster_info.name}>
+                                {info.cluster_info.name}
                             </MenuItem>
                         );
                     })
                 }
             </Select>
-            <p>{selectedCluster}</p>
-            <p>{clusterInfo?.name}</p>
-            <p>{clusterState?.active}</p>
+            <p>{selectedCluster?.cluster_addr}</p>
+            <p>{selectedCluster?.cluster_info.name}</p>
+            <p>{selectedCluster?.cluster_info.description}</p>
+            <p>{clusterState?.target[0].amount}</p>
         </Container>
     );
   }
