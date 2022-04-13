@@ -20,15 +20,11 @@ export interface Target {
 }
 
 export interface NativeToken {
-    denom: string
+    native_token: {denom: string}
 }
 
 export interface Token {
-    token: ContractAddress
-}
-
-export interface ContractAddress {
-    contract_addr: string
+    token: {contract_addr: string}
 }
 
 export interface ClusterInfo {

@@ -1,6 +1,6 @@
 import { Container, Paper, Grid, MenuItem, Select, Input, TextField } from '@mui/material';
 import useNetwork from 'hooks/useNetwork';
-import { useNebula, ClusterList, ClusterState, ClusterInfo } from 'hooks/useNebula';
+import { useNebula, ClusterList, ClusterState, ClusterInfo, NativeToken, Token } from 'hooks/useNebula';
 import { useEffect, useState } from 'react';
 import { useConnectedWallet, useLCDClient } from '@terra-money/wallet-provider';
 
@@ -18,6 +18,9 @@ export function NebulaDashboard() {
     const [clusters, setClusters] = useState<Cluster[]>();
     const [selectedCluster, setSelectedCluster] = useState<Cluster>();
     const [clusterState, setClusterState] = useState<ClusterState>();
+    const [imbalance, setImbalance] = useState<number>();
+    const [separateImbalances, setSeparateImbalances] = useState<number[]>();
+    const [amountsToUse, setAmountsToUse] = useState<number[]>();
     
     useEffect(() => {
         getAllClusters().then()
@@ -55,15 +58,17 @@ export function NebulaDashboard() {
         getClusterState(clusterAddress).then(data => {
             setClusterState(data);
             console.log(data)
+            setImbalance(getNotionalImbalance(data.inv.map(n => Number(n)), data.target.map(target => Number(target.amount)), data.prices.map(p => Number(p))));
+            setSeparateImbalances(getSeparateImbalances(data.inv.map(n => Number(n)), data.target.map(target => Number(target.amount)), data.prices.map(p => Number(p))));
         });
-    }
-
-    const onRefresh = () => {
-        
     }
 
     const handleChange = (e: any) => {
         setSelectedCluster(clusters?.find(cluster => cluster.cluster_info.name == e.target.value) as Cluster);
+    }
+
+    const onTextChange = (e: any) => {
+
     }
 
     const addVector = (a: number[], b: number[]) => {
@@ -104,20 +109,20 @@ export function NebulaDashboard() {
         return a.map(e => e * b);
     }
 
-    const capitalAllocation = (i: number[], p: number[]) => {
+    const getCapitalAllocation = (i: number[], p: number[]) => {
         return elementWiseMultiplication(i, p);
     }
 
-    const targetCapitalAllocation = (i: number[], w: number[], p: number[]) => {
+    const getTargetCapitalAllocation = (i: number[], w: number[], p: number[]) => {
         return multiplyByScalar(divideByScalar(elementWiseMultiplication(w, p), dotProduct(w, p)), dotProduct(i, p));
     }
 
-    const notionalImbalance = (i: number[], w: number[], p: number[]) => {
-        return sum(absolute(subtractVector(targetCapitalAllocation(i, w, p), capitalAllocation(i, p))));
+    const getNotionalImbalance = (i: number[], w: number[], p: number[]) => {
+        return sum(absolute(subtractVector(getTargetCapitalAllocation(i, w, p), getCapitalAllocation(i, p))));
     }
 
-    const separateImbalances = (i: number[], w: number[], p: number[]) => {
-        return subtractVector(targetCapitalAllocation(i, w, p), capitalAllocation(i, p));
+    const getSeparateImbalances = (i: number[], w: number[], p: number[]) => {
+        return subtractVector(getTargetCapitalAllocation(i, w, p), getCapitalAllocation(i, p));
     }
 
     return (
@@ -136,7 +141,21 @@ export function NebulaDashboard() {
                     })
                 }
             </Select>
-            {/* <TextField id="filled-basic" label="Filled" variant="filled" /> */}
+            <TextField
+                id="filled-number"
+                label="Bid amount (UST)"
+                type="number"
+                InputLabelProps={{
+                    shrink: true,
+                }}
+                inputProps={{
+                    min: 0,
+                    max: 10000000000
+                }}
+                onChange={onTextChange}
+                // value={0}
+                variant="filled"
+            />
             <p>{selectedCluster?.cluster_addr}</p>
             <p>{selectedCluster?.cluster_info.name}</p>
             <p>{selectedCluster?.cluster_info.description}</p>
@@ -153,7 +172,17 @@ export function NebulaDashboard() {
                 return (<p key={p}>{p}</p>)
             })}</div>
 
-            <p>Imbalance: {notionalImbalance(clusterState ? clusterState.inv.map(n => Number(n)) : [0], clusterState ? clusterState?.target.map(target => Number(target.amount)): [0], clusterState ? clusterState?.prices.map(p => Number(p)): [0])}</p>
+            <p>Imbalance: {imbalance}</p>
+            <div>Imbalances:</div>
+            <div>{separateImbalances?.map(i =>
+                {
+                    return (<p>{i/1_000_000}</p>)
+                }
+            )}</div>
+            <div>Assets:</div>
+            <div>{clusterState?.target.map(target => {
+                return (<p key="hello">{Object.keys(target.info)[0] == "native_token"? (target.info as NativeToken).native_token.denom:(target.info as Token).token.contract_addr}</p>)
+            })}</div>
         </Container>
     );
   }

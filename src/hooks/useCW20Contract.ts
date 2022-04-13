@@ -16,17 +16,17 @@ import { addressState } from "../data/wallet";
         total_supply: string
     }
   
-    export const useCW20Contract = (contractAddress: AccAddress) => {
+    export const useCW20Contract = () => {
         // const { post } = useWallet();
         // const fee = useFee();
         const userWalletAddr = useRecoilValue(addressState);
         const lcdClient = useRecoilValue(lcdClientQuery);
     
-        function _query<T>(queryMsg: any) {
+        function _query<T>(contractAddress: AccAddress, queryMsg: any) {
             return lcdClient.wasm.contractQuery<T>(contractAddress, queryMsg);
         }
     
-        function _createExecuteMsg(executeMsg: any, coins?: Coins.Input) {
+        function _createExecuteMsg(contractAddress: AccAddress, executeMsg: any, coins?: Coins.Input) {
             return new MsgExecuteContract(
                 userWalletAddr,
                 contractAddress,
@@ -35,17 +35,21 @@ import { addressState } from "../data/wallet";
             );
         }
 
-        function getBalance(): Promise<BalanceResponse> {
-            return _query<BalanceResponse>({
-                balance: {
-                    address: userWalletAddr
-                }
+        function getBalance(contractAddress: AccAddress): Promise<BalanceResponse> {
+            return _query<BalanceResponse>(
+                contractAddress,
+                {
+                    balance: {
+                        address: userWalletAddr
+                    }
             })
         }
 
-        function getTokenInfo(): Promise<TokenInfo> {
-            return _query<TokenInfo>({
-                token_info: {}
+        function getTokenInfo(contractAddress: AccAddress): Promise<TokenInfo> {
+            return _query<TokenInfo>(
+                contractAddress,
+                {
+                    token_info: {}
             })
         }
 
